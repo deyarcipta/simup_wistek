@@ -82,17 +82,18 @@ class AdminProdukJasaController extends Controller
 
         } else {
             $request->validate([
-                'nama_jasa'   => 'required|string|max:255',
-                'harga_jasa'  => 'required|numeric|min:0',
-                'jumlah_jasa' => 'nullable|integer|min:1'
+                'nama'   => 'required|string|max:255',
+                'harga'  => 'required|numeric|min:0',
+                'stok'   => 'nullable|integer|min:1',
+                'satuan' => 'nullable|string|max:255'
             ]);
-
+            
             $produkJasa->update([
-                'nama'   => $request->nama_jasa,
+                'nama'   => $request->nama,
                 'jenis'  => 'jasa',
-                'harga'  => $request->harga_jasa,
-                'jumlah'   => $request->jumlah_jasa ?? null,
-                'satuan' => null,
+                'harga'  => $request->harga,
+                'jumlah' => $request->stok ?? null,
+                'satuan' => $request->satuan ?? null,
                 'stok_barang_id' => null,
             ]);
         }

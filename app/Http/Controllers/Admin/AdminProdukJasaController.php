@@ -66,36 +66,26 @@ class AdminProdukJasaController extends Controller
         ]);
 
         if ($request->jenis == 'produk') {
-            $request->validate([
-                'stok_barang_id' => 'required|exists:stok_barang,id',
-            ]);
-
-            $stokBarang = StokBarang::find($request->stok_barang_id);
-
-            $produkJasa->update([
-                'nama'           => $stokBarang->nama_barang,
-                'jenis'          => 'produk',
-                'harga'          => $stokBarang->harga_jual,
-                'satuan'         => $stokBarang->satuan,
-                'stok_barang_id' => $stokBarang->id,
-            ]);
-
-        } else {
-            $request->validate([
-                'nama'   => 'required|string|max:255',
-                'harga'  => 'required|numeric|min:0',
-                'stok'   => 'nullable|integer|min:1',
-                'satuan' => 'nullable|string|max:255'
-            ]);
-            
-            $produkJasa->update([
-                'nama'   => $request->nama,
-                'jenis'  => 'jasa',
-                'harga'  => $request->harga,
-                'jumlah' => $request->stok ?? null,
-                'satuan' => $request->satuan ?? null,
-                'stok_barang_id' => null,
-            ]);
+            if ($request->filled('stok_barang_id')) {
+                $stokBarang = StokBarang::find($request->stok_barang_id);
+        
+                $produkJasa->update([
+                    'nama'           => $stokBarang->nama_barang,
+                    'jenis'          => 'produk',
+                    'harga'          => $stokBarang->harga_jual,
+                    'stok'           => null,
+                    'satuan'         => $stokBarang->satuan,
+                    'stok_barang_id' => $stokBarang->id,
+                ]);
+            } else {
+                $produkJasa->update([
+                    'nama'   => $request->nama,
+                    'jenis'  => 'produk',
+                    'harga'  => $request->harga,
+                    'stok'   => null,
+                    'satuan' => $request->satuan,
+                ]);
+            }
         }
 
         return redirect()->route('admin.produk-jasa.index')->with('success', 'Data berhasil diperbarui.');

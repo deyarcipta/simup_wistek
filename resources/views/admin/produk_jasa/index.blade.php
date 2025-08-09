@@ -105,6 +105,7 @@
                     <h5 class="modal-title">Edit Produk/Jasa</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+                <input type="hidden" id="edit_stok_barang_id" name="stok_barang_id">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Nama</label>

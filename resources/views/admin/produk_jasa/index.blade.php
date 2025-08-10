@@ -42,16 +42,18 @@
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                     <td>
                                         @if($item->jenis === 'produk')
-                                            {{ $item->stokBarang->stok ?? '-' }}
+                                            {{ $item->stok ?? ($item->stokBarang->stok ?? '-') }}
                                         @else
                                             {{ $item->jumlah ?? '-' }}
                                         @endif
                                     </td>
                                     <td>{{ $item->satuan ?? '-' }}</td>
                                     <td>
-                                        <button class="btn btn-warning btn-sm btnEdit" data-id="{{ $item->id }}">
+                                        {{-- Tombol edit selalu tampil, dengan data atribut jenis --}}
+                                        <button class="btn btn-warning btn-sm btnEdit" data-id="{{ $item->id }}" data-jenis="{{ $item->jenis }}">
                                             <i class="bx bx-edit"></i>
                                         </button>
+
                                         <form action="{{ route('admin.produk-jasa.destroy', $item->id) }}" method="POST" style="display:inline-block;">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
@@ -105,8 +107,11 @@
                     <h5 class="modal-title">Edit Produk/Jasa</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <input type="hidden" id="edit_stok_barang_id" name="stok_barang_id">
                 <div class="modal-body">
+                    <div class="mb-3" id="edit_stok_barang_group">
+                        <label class="form-label">Stok Barang ID</label>
+                        <input type="text" id="edit_stok_barang_id" name="stok_barang_id" class="form-control" readonly>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Nama</label>
                         <input type="text" id="edit_nama" name="nama" class="form-control" required>
@@ -122,9 +127,13 @@
                         <label class="form-label">Harga</label>
                         <input type="number" id="edit_harga" name="harga" class="form-control" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Stok (kosongkan untuk jasa)</label>
+                    <div class="mb-3" id="edit_stok_group">
+                        <label class="form-label">Stok (hanya untuk produk)</label>
                         <input type="number" id="edit_stok" name="stok" class="form-control">
+                    </div>
+                    <div class="mb-3" id="edit_jumlah_group" style="display:none;">
+                        <label class="form-label">Jumlah (hanya untuk jasa)</label>
+                        <input type="number" id="edit_jumlah" name="jumlah" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Satuan</label>
@@ -140,34 +149,80 @@
     </div>
 </div>
 
+{{-- Modal Info Edit Produk --}}
+<div class="modal fade" id="modalInfoEdit" tabindex="-1" aria-labelledby="modalInfoEditLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalInfoEditLabel">Informasi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Edit hanya dapat dilakukan pada jenis <strong>Jasa</strong>.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const modalEdit = new bootstrap.Modal(document.getElementById('modalEdit'));
+    const modalInfoEdit = new bootstrap.Modal(document.getElementById('modalInfoEdit'));
+
+    function toggleFields(jenis) {
+        if (jenis === 'produk') {
+            document.getElementById('edit_stok_group').style.display = 'block';
+            document.getElementById('edit_stok_barang_group').style.display = 'block';
+            document.getElementById('edit_jumlah_group').style.display = 'none';
+        } else {
+            document.getElementById('edit_stok_group').style.display = 'none';
+            document.getElementById('edit_stok_barang_group').style.display = 'none';
+            document.getElementById('edit_jumlah_group').style.display = 'block';
+        }
+    }
+
     document.querySelectorAll('.btnEdit').forEach(button => {
         button.addEventListener('click', function () {
             const id = this.getAttribute('data-id');
+            const jenis = this.getAttribute('data-jenis');
+
+            if (jenis === 'produk') {
+                modalInfoEdit.show();
+                return;
+            }
+
             const url = `{{ url('admin/produk-jasa/data') }}/${id}`;
 
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
+                    document.getElementById('edit_stok_barang_id').value = data.stok_barang_id || '';
                     document.getElementById('edit_nama').value = data.nama ?? '';
                     document.getElementById('edit_jenis').value = data.jenis ?? '';
                     document.getElementById('edit_harga').value = data.harga ?? '';
                     document.getElementById('edit_stok').value = data.stok ?? '';
+                    document.getElementById('edit_jumlah').value = data.jumlah ?? '';
                     document.getElementById('edit_satuan').value = data.satuan ?? '';
+
+                    toggleFields(data.jenis);
 
                     document.getElementById('formEdit').setAttribute('action', `{{ url('admin/produk-jasa') }}/${id}`);
 
-                    const modal = new bootstrap.Modal(document.getElementById('modalEdit'));
-                    modal.show();
+                    modalEdit.show();
                 })
                 .catch(err => console.error("Gagal ambil data:", err));
         });
     });
-});
 
+    document.getElementById('edit_jenis').addEventListener('change', function () {
+        toggleFields(this.value);
+    });
+});
 </script>
 @endpush
+
 @endsection

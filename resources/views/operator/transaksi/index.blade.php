@@ -6,9 +6,6 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5>Transaksi</h5>
         <div class="d-flex gap-2">
-            {{-- <a href="{{ route('transaksi.download') }}" class="btn btn-success btn-sm">
-                <i class="bx bx-download"></i> Download
-            </a> --}}
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTransaksi">
                 <i class="bx bx-plus"></i> Tambah Transaksi
             </button>
@@ -18,6 +15,14 @@
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+
+        {{-- Form Search --}}
+        <div class="mb-3">
+            <form method="GET" action="{{ route('transaksi.index') }}" class="d-flex gap-2">
+                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode / pembeli">
+                <button class="btn btn-secondary">Cari</button>
+            </form>
+        </div>
 
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
@@ -48,17 +53,22 @@
                             </ul>
                         </td>
                         <td>
-                            <form action="{{ route('operator.transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
+                            <form action="{{ route('transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
                             </form>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="text-center">Belum ada transaksi</td></tr>
+                    <tr><td colspan="7" class="text-center">Belum ada transaksi</td></tr>
                 @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Pagination --}}
+        <div class="mt-3">
+            {{ $transaksi->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>
@@ -67,7 +77,7 @@
 <div class="modal fade" id="modalTransaksi" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('operator.transaksi.store') }}" method="POST">
+            <form action="{{ route('transaksi.store') }}" method="POST">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Transaksi</h5>

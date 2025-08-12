@@ -19,6 +19,14 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
+        {{-- Form Search --}}
+        <div class="mb-3">
+            <form method="GET" action="{{ route('transaksi.index') }}" class="d-flex gap-2">
+                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode / pembeli">
+                <button class="btn btn-secondary">Cari</button>
+            </form>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
                 <thead>
@@ -55,10 +63,15 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="text-center">Belum ada transaksi</td></tr>
+                    <tr><td colspan="7" class="text-center">Belum ada transaksi</td></tr>
                 @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Pagination --}}
+        <div class="mt-3">
+            {{ $transaksi->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>

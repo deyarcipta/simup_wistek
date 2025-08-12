@@ -16,12 +16,24 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminTransaksiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->get('search');
+    
         $produkJasa = ProdukJasa::all();
-        $transaksi = Transaksi::with('details.produkJasa')->latest()->get();
-        return view('admin.transaksi.index', compact('produkJasa', 'transaksi'));
+    
+        $transaksi = Transaksi::with(['details.produkJasa', 'user'])
+            ->when($search, function ($query) use ($search) {
+                $query->where('kode_transaksi', 'like', "%{$search}%")
+                      ->orWhere('nama_pembeli', 'like', "%{$search}%");
+            })
+            ->latest() 
+            ->paginate(20)
+            ->appends(['search' => $search]);
+    
+        return view('admin.transaksi.index', compact('produkJasa', 'transaksi', 'search'));
     }
+
 
     public function store(Request $request)
     {   

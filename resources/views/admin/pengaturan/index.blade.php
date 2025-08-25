@@ -8,9 +8,10 @@
         <h5>Pengaturan Umum</h5>
     </div>
     <div class="card-body">
-        @if(session('success'))
+        {{-- @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+        @endif --}}
+
 
         <form action="{{ route('pengaturan.update') }}" method="POST" enctype="multipart/form-data">
             @csrf

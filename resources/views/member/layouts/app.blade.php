@@ -6,6 +6,7 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
     {{-- Favicon / Logo --}}
     @if(!empty($logoAplikasi))
         <link rel="icon" type="image/png" href="{{ asset('storage/' . $logoAplikasi) }}">
@@ -35,9 +36,6 @@
 
     <link rel="stylesheet" href="{{ asset('vendor/fonts/iconify-icons.css') }}" />
 
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-  
     <!-- Core CSS -->
     <!-- build:css assets/vendor/css/theme.css  -->
 
@@ -73,11 +71,11 @@
     <div class="layout-container">
       
       <!-- Sidebar -->
-      @include('admin.layouts.sidebar')
+      @include('member.layouts.sidebar')
 
       <!-- Main Content -->
       <div class="layout-page">
-        @include('admin.layouts.navbar')
+        @include('member.layouts.navbar')
         
         <!-- Page Content -->
         <div class="content-wrapper">
@@ -85,13 +83,11 @@
             @yield('content')
           </div>
         </div>
-        <div class="layout-overlay layout-menu-toggle"></div>
       </div>
 
     </div>
   </div>
-  @stack('scripts')
-  <!-- Core JS -->
+<!-- Core JS -->
 
     <script src="{{ asset('vendor/libs/jquery/jquery.js') }}"></script>
 
@@ -113,38 +109,5 @@
 
     <!-- Page JS -->
     <script src="{{ asset('js/dashboards-analytics.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil',
-        text: '{{ session('success') }}',
-        timer: 2000,
-        showConfirmButton: false,
-        didOpen: () => {
-            const swalContainer = document.querySelector('.swal2-container');
-            if(swalContainer) swalContainer.style.zIndex = '20000';
-        }
-    })
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    Swal.fire({
-        icon: 'error',
-        title: 'Gagal',
-        text: '{{ session('error') }}',
-        didOpen: () => {
-            const swalContainer = document.querySelector('.swal2-container');
-            if(swalContainer) swalContainer.style.zIndex = '20000';
-        }
-    })
-</script>
-@endif
-
-@stack('scripts')
 </body>
 </html>

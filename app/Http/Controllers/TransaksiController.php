@@ -7,6 +7,7 @@ use App\Models\ProdukJasa;
 use App\Models\StokBarang;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
+use App\Models\Member;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +51,7 @@ class TransaksiController extends Controller
             // Hitung total harga
             $total = $produk->harga * $request->jumlah;
             $userId = Auth::id(); // Ambil ID user yang sedang login.
+            $memberId = $request->member_id;
             
             // Simpan transaksi (tambahkan user_id)
             $transaksi = Transaksi::create([
@@ -58,6 +60,7 @@ class TransaksiController extends Controller
                 'nama_pembeli'   => $request->nama_pembeli,
                 'total'          => $total,
                 'user_id'        => $userId, // user yang login
+                'member_id'      => $memberId,
             ]);
 
             // Simpan detail transaksi
@@ -76,6 +79,17 @@ class TransaksiController extends Controller
                     $stokBarang->stok = max(0, $stokBarang->stok - $request->jumlah);
                     $stokBarang->save();
                 }
+            }
+            // Tambahkan saldo member sesuai ketentuan
+            if ($memberId) {
+                $member = Member::find($memberId);
+                $persen = 0;
+                if ($total < 30000) $persen = 0.1;
+                elseif ($total <= 50000) $persen = 0.12;
+                else $persen = 0.15;
+
+                $member->saldo += $total * $persen;
+                $member->save();
             }
         });
 
@@ -98,6 +112,22 @@ class TransaksiController extends Controller
                         $stokBarang->stok += $detail->jumlah;
                         $stokBarang->save();
                     }
+                }
+            }
+            if ($transaksi->member_id) {
+                $member = Member::find($transaksi->member_id);
+                if ($member) {
+                    $total = $transaksi->total;
+                    $persen = 0;
+
+                    // Hitung persentase sesuai total transaksi
+                    if ($total < 30000) $persen = 0.1;       // 5%
+                    elseif ($total <= 50000) $persen = 0.12;  // 7%
+                    else $persen = 0.15;                        // 10%
+
+                    // Kurangi saldo member
+                    $member->saldo -= $total * $persen;
+                    $member->save();
                 }
             }
         }

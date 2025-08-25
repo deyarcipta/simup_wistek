@@ -19,6 +19,8 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard');
             } elseif ($user->role === 'operator') {
                 return redirect()->route('operator.dashboard');
+            } elseif ($user->role === 'member') {
+            return redirect()->route('member.dashboard');
             }
         }
 
@@ -42,6 +44,8 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard');
             } elseif ($user->role === 'operator') {
                 return redirect()->route('operator.dashboard');
+            } elseif ($user->role === 'member') {
+            return redirect()->route('member.dashboard');
             }
         }
 

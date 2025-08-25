@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Transaksi extends Model
 {
     protected $table = 'transaksi';
-    protected $fillable = ['kode_transaksi', 'tanggal', 'nama_pembeli', 'total', 'user_id'];
+    protected $fillable = ['kode_transaksi', 'tanggal', 'nama_pembeli', 'total', 'user_id', 'member_id'];
     protected $casts = [
         'tanggal' => 'datetime',
     ];
@@ -18,5 +18,9 @@ class Transaksi extends Model
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function member() {
+        return $this->belongsTo(Member::class, 'member_id');
     }
 }

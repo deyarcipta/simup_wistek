@@ -53,7 +53,7 @@
                             </ul>
                         </td>
                         <td>
-                            <form action="{{ route('transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
+                            <form action="{{ route('operator.transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
                             </form>
@@ -77,7 +77,7 @@
 <div class="modal fade" id="modalTransaksi" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('transaksi.store') }}" method="POST">
+            <form action="{{ route('operator.transaksi.store') }}" method="POST">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Transaksi</h5>

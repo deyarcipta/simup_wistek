@@ -6,26 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
-        Schema::create('pencairan_saldo', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('member_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // admin/operator pencair
-            $table->decimal('jumlah', 15, 2);
-            $table->timestamps();
+        Schema::table('pengeluaran_lain', function (Blueprint $table) {
+            // tambahkan kolom member_id
+            $table->unsignedBigInteger('member_id')->nullable()->after('id');
+
+            // tambahkan relasi ke users
+            $table->foreign('member_id')
+                ->references('id')
+                ->on('users')
+                ->nullOnDelete();
         });
     }
 
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('pencairan_saldo');
+        Schema::table('pengeluaran_lain', function (Blueprint $table) {
+            $table->dropForeign(['member_id']);
+            $table->dropColumn('member_id');
+        });
     }
 };

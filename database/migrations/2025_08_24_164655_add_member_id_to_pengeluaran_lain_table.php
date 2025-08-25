@@ -6,26 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('pengeluaran_lain', function (Blueprint $table) {
-            $table->dropForeign(['member_id']);
+            if (!Schema::hasColumn('pengeluaran_lain', 'member_id')) {
+                $table->unsignedBigInteger('member_id')->nullable()->after('id');
+            }
+
+            // tambahkan FK hanya kalau belum ada
             $table->foreign('member_id')
-                  ->references('id')->on('users')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('users')
+                ->nullOnDelete();
         });
     }
-    
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
         Schema::table('pengeluaran_lain', function (Blueprint $table) {
-            //
+            $table->dropForeign(['member_id']);
+            $table->dropColumn('member_id');
         });
     }
 };

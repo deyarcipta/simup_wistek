@@ -13,10 +13,14 @@ use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\AdminPiutangController;
 use App\Http\Controllers\Admin\AdminPengaturanController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AdminKelolaMemberController;
+use App\Http\Controllers\Admin\AdminPencairanSaldoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProdukJasaController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\Member\MemberDashboardController;
+use App\Http\Controllers\Member\MemberProfileController;
 use App\Models\StokBarang;
 
 /*
@@ -86,6 +90,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::put('/piutang/{piutang}', [AdminPiutangController::class, 'update'])->name('piutang.update');
         Route::delete('/piutang/{piutang}', [AdminPiutangController::class, 'destroy'])->name('piutang.destroy');
 
+        // kelola Member
+        Route::resource('data-member', AdminKelolaMemberController::class);
+        Route::resource('pencairan', AdminPencairanSaldoController::class);
+
         // Pengaturan
         Route::get('pengaturan', [AdminPengaturanController::class, 'index'])->name('pengaturan.index');
         Route::put('pengaturan', [AdminPengaturanController::class, 'update'])->name('pengaturan.update');
@@ -116,3 +124,14 @@ Route::middleware(['auth', 'role:operator'])
         Route::post('transaksi', [TransaksiController::class, 'store'])->name('operator.transaksi.store');
         Route::delete('transaksi/{id}', [TransaksiController::class, 'destroy'])->name('operator.transaksi.destroy');
     });
+
+Route::middleware(['auth', 'role:member'])
+    ->prefix('member')
+    ->group(function () {
+        Route::get('/dashboard', [MemberDashboardController::class, 'index'])
+        ->name('member.dashboard');
+
+        // Profile
+        Route::get('/profile', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
+        Route::post('/profile', [MemberProfileController::class, 'update'])->name('member.profile.update');
+    }); 

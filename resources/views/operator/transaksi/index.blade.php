@@ -12,9 +12,10 @@
         </div>
     </div>
     <div class="card-body">
-        @if(session('success'))
+        {{-- @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+        @endif --}}
+
 
         {{-- Form Search --}}
         <div class="mb-3">
@@ -84,6 +85,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Member (Opsional)</label>
+                        <select name="member_id" class="form-control">
+                            <option value="">-- Pilih Member --</option>
+                            @foreach(\App\Models\Member::all() as $m)
+                                <option value="{{ $m->id }}">{{ $m->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label>Nama Pembeli</label>
                         <input type="text" name="nama_pembeli" class="form-control">

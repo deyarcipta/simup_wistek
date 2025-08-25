@@ -64,7 +64,31 @@ class AdminPengeluaranLainController extends Controller
 
     public function destroy($id)
     {
-        PengeluaranLain::findOrFail($id)->delete();
-        return back()->with('success', 'Data berhasil dihapus');
+        $pengeluaran = PengeluaranLain::findOrFail($id);
+
+        // Hapus juga pencairan jika ada
+        if ($pengeluaran->pencairan) {
+            // kembalikan saldo ke member
+            $member = $pencairan->member;
+            $member->saldo += $pencairan->jumlah;
+            $member->save();
+
+            // Hapus pencairan
+            $pengeluaran->pencairan->delete();
+        }
+
+        // dd($pengeluaran->piutang);
+        // Jika ada piutang
+        if ($pengeluaran->piutang) {
+            $piutang = $pengeluaran->piutang;
+
+            // kembalikan sisa saldo piutang
+            $piutang->sisa_nominal += $pengeluaran->total;
+            $piutang->save();
+        }
+
+        $pengeluaran->delete();
+
+        return back()->with('success', 'Data pengeluaran & pencairan terkait berhasil dihapus');
     }
 }

@@ -11,7 +11,9 @@ class AdminKelolaUserController extends Controller
 {
     public function index()
     {
-        $users = User::orderBy('name')->get();
+        $users = User::whereIn('role', ['admin', 'operator'])
+                        ->orderBy('name')
+                        ->get();
         return view('admin.kelola_user.index', compact('users'));
     }
 

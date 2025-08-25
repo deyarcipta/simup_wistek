@@ -14,22 +14,22 @@
             </button>
         </div>
     </div>
+
     <div class="card-body">
-        @if(session('success'))
+        {{-- @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+        @endif --}}
+
 
         {{-- Form Search --}}
-        <div class="mb-3">
-            <form method="GET" action="{{ route('transaksi.index') }}" class="d-flex gap-2">
-                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode / pembeli">
-                <button class="btn btn-secondary">Cari</button>
-            </form>
-        </div>
+        <form method="GET" action="{{ route('transaksi.index') }}" class="d-flex gap-2 mb-3">
+            <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode / pembeli">
+            <button class="btn btn-secondary">Cari</button>
+        </form>
 
         <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
                     <tr>
                         <th>Kode</th>
                         <th>Tanggal</th>
@@ -44,12 +44,12 @@
                 @forelse($transaksi as $trx)
                     <tr>
                         <td>{{ $trx->kode_transaksi }}</td>
-                        <td>{{ $trx->tanggal }}</td>
-                        <td>{{ $trx->nama_pembeli }}</td>
+                        <td>{{ $trx->tanggal->format('d/m/Y H:i') }}</td>
+                        <td>{{ $trx->nama_pembeli ?? $trx->member->nama ?? '-' }}</td>
                         <td>Rp {{ number_format($trx->total,0,',','.') }}</td>
                         <td>{{ $trx->user->name ?? '-' }}</td>
-                        <td>
-                            <ul>
+                        <td class="text-start">
+                            <ul class="mb-0 ps-3">
                                 @foreach($trx->details as $d)
                                     <li>{{ $d->produkJasa->nama }} ({{ $d->jumlah }} x Rp {{ number_format($d->harga,0,',','.') }})</li>
                                 @endforeach
@@ -63,13 +63,12 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-center">Belum ada transaksi</td></tr>
+                    <tr><td colspan="7">Belum ada transaksi</td></tr>
                 @endforelse
                 </tbody>
             </table>
         </div>
 
-        {{-- Pagination --}}
         <div class="mt-3">
             {{ $transaksi->links('pagination::bootstrap-5') }}
         </div>
@@ -88,23 +87,36 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
+                        <label>Member (Opsional)</label>
+                        <select name="member_id" class="form-control">
+                            <option value="">-- Pilih Member --</option>
+                            @foreach(\App\Models\Member::all() as $m)
+                                <option value="{{ $m->id }}">{{ $m->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label>Nama Pembeli</label>
                         <input type="text" name="nama_pembeli" class="form-control">
                     </div>
+
                     <div class="mb-3">
                         <label>Produk / Jasa</label>
-                        <select name="produk_jasa_id" id="produk_jasa_id" class="form-control" required>
+                        <select name="produk_jasa_id" class="form-control" required>
                             <option value="">-- Pilih --</option>
                             @foreach($produkJasa as $p)
                                 <option value="{{ $p->id }}">{{ $p->nama }} (Rp {{ number_format($p->harga,0,',','.') }})</option>
                             @endforeach
                         </select>
                     </div>
+
                     <div class="mb-3">
                         <label>Jumlah</label>
                         <input type="number" name="jumlah" class="form-control" min="1" required>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button class="btn btn-primary">Simpan</button>
                 </div>

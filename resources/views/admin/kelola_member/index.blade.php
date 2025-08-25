@@ -1,19 +1,18 @@
 @extends('admin.layouts.app')
-@section('title', 'Kelola User')
+@section('title', 'Data Member')
 
 @section('content')
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5>Kelola User</h5>
+        <h5>Data Member</h5>
         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambah">
-            <i class="bx bx-plus"></i> Tambah User
+            <i class="bx bx-plus"></i> Tambah Member
         </button>
     </div>
     <div class="card-body">
-        {{-- @if(session('success'))
+        {{-- {{-- @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif --}}
-
 
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
@@ -21,23 +20,25 @@
                     <tr>
                         <th>Nama</th>
                         <th>Email</th>
-                        <th>Role</th>
+                        <th>Whatsapp</th>
+                        <th>Saldo</th>
                         <th width="150">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                @forelse($users as $user)
+                @forelse($members as $member)
                     <tr>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td><span class="badge bg-info">{{ ucfirst($user->role) }}</span></td>
+                        <td>{{ $member->name }}</td>
+                        <td>{{ $member->email }}</td>
+                        <td>{{ $member->member->no_hp ?? '-' }}</td>
+                        <td>Rp {{ number_format($member->member->saldo ?? 0, 0, ',', '.') }}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $user->id }}">
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $member->id }}">
                                 <i class="bx bx-edit"></i>
                             </button>
-                            <form action="{{ route('kelola-user.destroy', $user->id) }}" method="POST" style="display:inline-block">
+                            <form action="{{ route('data-member.destroy', $member->id) }}" method="POST" style="display:inline-block">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm" onclick="return confirm('Hapus user ini?')">
+                                <button class="btn btn-danger btn-sm" onclick="return confirm('Hapus member ini?')">
                                     <i class="bx bx-trash"></i>
                                 </button>
                             </form>
@@ -45,7 +46,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center">Belum ada user</td>
+                        <td colspan="3" class="text-center">Belum ada member</td>
                     </tr>
                 @endforelse
                 </tbody>
@@ -58,10 +59,10 @@
 <div class="modal fade" id="modalTambah" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('kelola-user.store') }}" method="POST">
+            <form action="{{ route('data-member.store') }}" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah User</h5>
+                    <h5 class="modal-title">Tambah Member</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -74,16 +75,8 @@
                         <input type="email" name="email" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label>Password</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Role</label>
-                        <select name="role" class="form-control" required>
-                            <option value="admin">Admin</option>
-                            <option value="operator">Operator</option>
-                            <option value="member">Member</option>
-                        </select>
+                        <label>Nomor Whatsapp</label>
+                        <input type="text" name="no_hp" class="form-control" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -94,37 +87,29 @@
     </div>
 </div>
 
-{{-- Modal Edit untuk setiap user --}}
-@foreach($users as $user)
-<div class="modal fade" id="modalEdit{{ $user->id }}" tabindex="-1">
+{{-- Modal Edit untuk setiap member --}}
+@foreach($members as $member)
+<div class="modal fade" id="modalEdit{{ $member->id }}" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('kelola-user.update', $user->id) }}" method="POST">
+            <form action="{{ route('data-member.update', $member->id) }}" method="POST">
                 @csrf @method('PUT')
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit User</h5>
+                    <h5 class="modal-title">Edit Member</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label>Nama</label>
-                        <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
+                        <input type="text" name="name" class="form-control" value="{{ $member->name }}" required>
                     </div>
                     <div class="mb-3">
                         <label>Email</label>
-                        <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
+                        <input type="email" name="email" class="form-control" value="{{ $member->email }}" required>
                     </div>
                     <div class="mb-3">
                         <label>Password (kosongkan jika tidak diganti)</label>
                         <input type="password" name="password" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label>Role</label>
-                        <select name="role" class="form-control" required>
-                            <option value="admin" {{ $user->role=='admin'?'selected':'' }}>Admin</option>
-                            <option value="operator" {{ $user->role=='operator'?'selected':'' }}>Operator</option>
-                            <option value="member" {{ $user->role=='member'?'selected':'' }}>Member</option>
-                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">

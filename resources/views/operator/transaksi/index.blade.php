@@ -25,14 +25,6 @@
             </form>
         </div>
 
-        {{-- Form Search --}}
-        <div class="mb-3">
-            <form method="GET" action="{{ route('transaksi.index') }}" class="d-flex gap-2">
-                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode / pembeli">
-                <button class="btn btn-secondary">Cari</button>
-            </form>
-        </div>
-
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
                 <thead>
@@ -62,7 +54,7 @@
                             </ul>
                         </td>
                         <td>
-                            <form action="{{ route('operator.transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
+                            <form action="{{ route('transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
                             </form>

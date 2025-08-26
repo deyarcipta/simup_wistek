@@ -27,14 +27,6 @@
             <button class="btn btn-secondary">Cari</button>
         </form>
 
-        {{-- Form Search --}}
-        <div class="mb-3">
-            <form method="GET" action="{{ route('transaksi.index') }}" class="d-flex gap-2">
-                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode / pembeli">
-                <button class="btn btn-secondary">Cari</button>
-            </form>
-        </div>
-
         <div class="table-responsive">
             <table class="table table-bordered align-middle text-center">
                 <thead class="table-light">
@@ -71,20 +63,13 @@
                         </td>
                     </tr>
                 @empty
-<<<<<<< HEAD
                     <tr><td colspan="7" class="text-center">Belum ada transaksi</td></tr>
-=======
-                    <tr><td colspan="7">Belum ada transaksi</td></tr>
->>>>>>> e118f6e
                 @endforelse
                 </tbody>
             </table>
         </div>
 
-<<<<<<< HEAD
         {{-- Pagination --}}
-=======
->>>>>>> e118f6e
         <div class="mt-3">
             {{ $transaksi->links('pagination::bootstrap-5') }}
         </div>

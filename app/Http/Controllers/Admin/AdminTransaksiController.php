@@ -29,7 +29,7 @@ class AdminTransaksiController extends Controller
             })
             ->latest() 
             ->paginate(20)
-            ->appends(['search' => $search]);
+            ->appends(['search' => $search, 'tab' => 'riwayat']);
 
         $hasStartedLogbook = true; // Admin can always access POS cashier
     

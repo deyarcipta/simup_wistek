@@ -158,10 +158,11 @@
                     <div class="card-body">
                         {{-- Form Pencarian --}}
                         <div class="mb-3">
-                            <form method="GET" action="{{ route('operator.transaksi.index') }}" class="d-flex gap-2">
-                                <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode transaksi atau pembeli...">
-                                <button class="btn btn-secondary"><i class="bx bx-search"></i> Cari</button>
-                            </form>
+                             <form method="GET" action="{{ route('operator.transaksi.index') }}" class="d-flex gap-2">
+                                 <input type="hidden" name="tab" value="riwayat">
+                                 <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode transaksi atau pembeli...">
+                                 <button class="btn btn-secondary"><i class="bx bx-search"></i> Cari</button>
+                             </form>
                         </div>
 
                         <div class="table-responsive">
@@ -445,8 +446,8 @@
                     // Reset Keranjang
                     cart = [];
                     renderCart();
-                    // Refresh Halaman (atau load data via Ajax untuk list)
-                    window.location.reload();
+                    // Redirect ke index bersih agar kembali ke Mesin Kasir (tanpa parameter tab/page)
+                    window.location.href = "{{ route('operator.transaksi.index') }}";
                 });
             } else {
                 throw new Error(data.message || 'Transaksi gagal disimpan.');
@@ -462,5 +463,18 @@
             btnCheckout.innerHTML = '<i class="bx bx-check-circle me-1"></i> Simpan &amp; Bayar';
         });
     }
+
+    // Pertahankan tab riwayat transaksi jika parameter URL tab=riwayat terdeteksi
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
+        if (activeTab === 'riwayat') {
+            const tabElement = document.getElementById('pills-riwayat-tab');
+            if (tabElement) {
+                const tabTrigger = new bootstrap.Tab(tabElement);
+                tabTrigger.show();
+            }
+        }
+    });
 </script>
 @endsection

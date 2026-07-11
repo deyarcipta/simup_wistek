@@ -27,7 +27,7 @@ class TransaksiController extends Controller
             })
             ->latest() 
             ->paginate(20)
-            ->appends(['search' => $search]);
+            ->appends(['search' => $search, 'tab' => 'riwayat']);
     
         $today = Carbon::today();
         $logbook = \App\Models\Logbook::where('tanggal', $today)->first();

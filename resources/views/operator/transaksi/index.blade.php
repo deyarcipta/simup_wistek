@@ -118,7 +118,6 @@
                         </div>
                     </div>
 
-<<<<<<< HEAD
                     {{-- KERANJANG KANAN --}}
                     <div class="col-lg-4 mb-4">
                         <div class="card h-100 shadow-sm border-0 d-flex flex-column">
@@ -162,40 +161,6 @@
                             <form method="GET" action="{{ route('operator.transaksi.index') }}" class="d-flex gap-2">
                                 <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari kode transaksi atau pembeli...">
                                 <button class="btn btn-secondary"><i class="bx bx-search"></i> Cari</button>
-=======
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead>
-                    <tr>
-                        <th>Kode</th>
-                        <th>Tanggal</th>
-                        <th>Pembeli</th>
-                        <th>Total</th>
-                        <th>Pembuat</th>
-                        <th>Detail</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @forelse($transaksi as $trx)
-                    <tr>
-                        <td>{{ $trx->kode_transaksi }}</td>
-                        <td>{{ $trx->tanggal }}</td>
-                        <td>{{ $trx->nama_pembeli }}</td>
-                        <td>Rp {{ number_format($trx->total,0,',','.') }}</td>
-                        <td>{{ $trx->user->name ?? '-' }}</td>
-                        <td>
-                            <ul>
-                                @foreach($trx->details as $d)
-                                    <li>{{ $d->produkJasa->nama }} ({{ $d->jumlah }} x Rp {{ number_format($d->harga,0,',','.') }})</li>
-                                @endforeach
-                            </ul>
-                        </td>
-                        <td>
-                            <form action="{{ route('transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
->>>>>>> a15ff231cfb9940d0c52a73ea5d7ef585ab4bb2a
                             </form>
                         </div>
 

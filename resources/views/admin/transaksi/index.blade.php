@@ -112,7 +112,6 @@
                                 </div>
                             </div>
 
-<<<<<<< HEAD
                             <div class="card-footer bg-light border-top mt-auto">
                                 <div class="d-flex justify-content-between mb-3">
                                     <span class="text-muted fw-semibold">Total Pembayaran:</span>
@@ -197,53 +196,6 @@
                     </div>
                 </div>
             </div>
-=======
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle text-center">
-                <thead class="table-light">
-                    <tr>
-                        <th>Kode</th>
-                        <th>Tanggal</th>
-                        <th>Pembeli</th>
-                        <th>Total</th>
-                        <th>Pembuat</th>
-                        <th>Detail</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @forelse($transaksi as $trx)
-                    <tr>
-                        <td>{{ $trx->kode_transaksi }}</td>
-                        <td>{{ $trx->tanggal->format('d/m/Y H:i') }}</td>
-                        <td>{{ $trx->nama_pembeli ?? $trx->member->nama ?? '-' }}</td>
-                        <td>Rp {{ number_format($trx->total,0,',','.') }}</td>
-                        <td>{{ $trx->user->name ?? '-' }}</td>
-                        <td class="text-start">
-                            <ul class="mb-0 ps-3">
-                                @foreach($trx->details as $d)
-                                    <li>{{ $d->produkJasa->nama }} ({{ $d->jumlah }} x Rp {{ number_format($d->harga,0,',','.') }})</li>
-                                @endforeach
-                            </ul>
-                        </td>
-                        <td>
-                            <form action="{{ route('transaksi.destroy',$trx->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm"><i class="bx bx-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="7" class="text-center">Belum ada transaksi</td></tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Pagination --}}
-        <div class="mt-3">
-            {{ $transaksi->links('pagination::bootstrap-5') }}
->>>>>>> a15ff231cfb9940d0c52a73ea5d7ef585ab4bb2a
         </div>
     </div>
 </div>

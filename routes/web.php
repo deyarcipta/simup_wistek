@@ -13,14 +13,12 @@ use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\AdminPiutangController;
 use App\Http\Controllers\Admin\AdminPengaturanController;
 use App\Http\Controllers\Admin\AdminProfileController;
-use App\Http\Controllers\Admin\AdminKelolaMemberController;
-use App\Http\Controllers\Admin\AdminPencairanSaldoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProdukJasaController;
 use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\Member\MemberDashboardController;
-use App\Http\Controllers\Member\MemberProfileController;
+use App\Http\Controllers\LogbookController;
+use App\Http\Controllers\Admin\AdminLogbookController;
 use App\Models\StokBarang;
 
 /*
@@ -48,6 +46,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
 
         // Kelola User
+        Route::get('kelola-user/download-sample', [AdminKelolaUserController::class, 'downloadSample'])->name('kelola-user.download-sample');
+        Route::get('kelola-user/export', [AdminKelolaUserController::class, 'exportExcel'])->name('kelola-user.export');
+        Route::post('kelola-user/import', [AdminKelolaUserController::class, 'importExcel'])->name('kelola-user.import');
         Route::resource('kelola-user', AdminKelolaUserController::class)->except(['show']);
 
         // Produk Jasa
@@ -90,9 +91,13 @@ Route::middleware(['auth', 'role:admin'])
         Route::put('/piutang/{piutang}', [AdminPiutangController::class, 'update'])->name('piutang.update');
         Route::delete('/piutang/{piutang}', [AdminPiutangController::class, 'destroy'])->name('piutang.destroy');
 
-        // kelola Member
-        Route::resource('data-member', AdminKelolaMemberController::class);
-        Route::resource('pencairan', AdminPencairanSaldoController::class);
+
+
+        // Logbook UP
+        Route::get('logbook', [AdminLogbookController::class, 'index'])->name('admin.logbook.index');
+        Route::get('logbook/download-pdf', [AdminLogbookController::class, 'exportPdf'])->name('admin.logbook.download-pdf');
+        Route::get('logbook/download-excel', [AdminLogbookController::class, 'exportExcel'])->name('admin.logbook.download-excel');
+        Route::get('logbook/{id}', [AdminLogbookController::class, 'show'])->name('admin.logbook.show');
 
         // Pengaturan
         Route::get('pengaturan', [AdminPengaturanController::class, 'index'])->name('pengaturan.index');
@@ -123,15 +128,13 @@ Route::middleware(['auth', 'role:operator'])
         Route::get('transaksi', [TransaksiController::class, 'index'])->name('operator.transaksi.index');
         Route::post('transaksi', [TransaksiController::class, 'store'])->name('operator.transaksi.store');
         Route::delete('transaksi/{id}', [TransaksiController::class, 'destroy'])->name('operator.transaksi.destroy');
+
+        // Logbook Hari Ini
+        Route::get('logbook', [LogbookController::class, 'index'])->name('operator.logbook.index');
+        Route::post('logbook/start', [LogbookController::class, 'startDay'])->name('operator.logbook.start');
+        Route::post('logbook/shift1', [LogbookController::class, 'submitShift1'])->name('operator.logbook.shift1');
+        Route::post('logbook/start-shift2', [LogbookController::class, 'startShift2'])->name('operator.logbook.start_shift2');
+        Route::post('logbook/shift2', [LogbookController::class, 'submitShift2'])->name('operator.logbook.shift2');
     });
 
-Route::middleware(['auth', 'role:member'])
-    ->prefix('member')
-    ->group(function () {
-        Route::get('/dashboard', [MemberDashboardController::class, 'index'])
-        ->name('member.dashboard');
-
-        // Profile
-        Route::get('/profile', [MemberProfileController::class, 'edit'])->name('member.profile.edit');
-        Route::post('/profile', [MemberProfileController::class, 'update'])->name('member.profile.update');
-    }); 
+ 

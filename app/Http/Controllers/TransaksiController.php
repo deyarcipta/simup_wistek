@@ -7,7 +7,6 @@ use App\Models\ProdukJasa;
 use App\Models\StokBarang;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
-use App\Models\Member;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +18,7 @@ class TransaksiController extends Controller
     {
         $search = $request->get('search');
     
-        $produkJasa = ProdukJasa::all();
+        $produkJasa = ProdukJasa::with('stokBarang')->get();
     
         $transaksi = Transaksi::with(['details.produkJasa', 'user'])
             ->when($search, function ($query) use ($search) {
@@ -30,11 +29,96 @@ class TransaksiController extends Controller
             ->paginate(20)
             ->appends(['search' => $search]);
     
-        return view('operator.transaksi.index', compact('produkJasa', 'transaksi', 'search'));
+        $today = Carbon::today();
+        $logbook = \App\Models\Logbook::where('tanggal', $today)->first();
+        $hasStartedLogbook = $logbook && in_array($logbook->status, ['aktif', 'shift_1_selesai']);
+
+        return view('operator.transaksi.index', compact('produkJasa', 'transaksi', 'search', 'hasStartedLogbook'));
     }
 
     public function store(Request $request)
     {   
+        $today = Carbon::today();
+        $logbook = \App\Models\Logbook::where('tanggal', $today)->first();
+        $hasStartedLogbook = $logbook && in_array($logbook->status, ['aktif', 'shift_1_selesai']);
+
+        if (!$hasStartedLogbook) {
+            return $request->expectsJson() || $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => 'Hari operasional belum dimulai atau sudah ditutup. Anda tidak dapat melakukan transaksi POS sekarang.'
+                ], 403)
+                : redirect()->back()->with('error', 'Hari operasional belum dimulai atau sudah ditutup. Anda tidak dapat melakukan transaksi POS sekarang.');
+        }
+
+        if ($request->has('cart') || $request->isJson()) {
+            $cartData = $request->input('cart');
+            if (is_string($cartData)) {
+                $cartData = json_decode($cartData, true);
+            }
+
+            if (empty($cartData)) {
+                return $request->expectsJson() || $request->ajax()
+                    ? response()->json(['success' => false, 'message' => 'Keranjang kosong.'], 422)
+                    : redirect()->back()->with('error', 'Keranjang kosong.');
+            }
+
+            DB::transaction(function () use ($cartData) {
+                // Generate kode transaksi POS
+                $kodeTransaksi = 'POS-' . strtoupper(Str::random(6));
+                $userId = Auth::id();
+
+                // Simpan transaksi utama terlebih dahulu dengan total 0
+                $transaksi = Transaksi::create([
+                    'kode_transaksi' => $kodeTransaksi,
+                    'tanggal'        => now(),
+                    'nama_pembeli'   => 'Umum',
+                    'total'          => 0,
+                    'user_id'        => $userId,
+                    'member_id'      => null,
+                ]);
+
+                $total = 0;
+
+                foreach ($cartData as $item) {
+                    $produk = ProdukJasa::findOrFail($item['produk_jasa_id']);
+                    $subtotal = $produk->harga * $item['jumlah'];
+                    $total += $subtotal;
+
+                    // Simpan detail transaksi
+                    TransaksiDetail::create([
+                        'transaksi_id'    => $transaksi->id,
+                        'produk_jasa_id'  => $produk->id,
+                        'jumlah'          => $item['jumlah'],
+                        'harga'           => $produk->harga,
+                        'subtotal'        => $subtotal
+                    ]);
+
+                    // Kurangi stok jika jenis produk
+                    if ($produk->jenis === 'produk' && $produk->stok_barang_id) {
+                        $stokBarang = StokBarang::find($produk->stok_barang_id);
+                        if ($stokBarang) {
+                            $stokBarang->stok = max(0, $stokBarang->stok - $item['jumlah']);
+                            $stokBarang->save();
+                        }
+                    }
+                }
+
+                // Update total transaksi
+                $transaksi->update(['total' => $total]);
+            });
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Transaksi POS berhasil disimpan.'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Transaksi POS berhasil disimpan.');
+        }
+
+        // Fallback untuk single transaksi lama
         $request->validate([
             'produk_jasa_id' => 'required|exists:produk_jasa,id',
             'jumlah'         => 'required|integer|min:1',
@@ -53,11 +137,11 @@ class TransaksiController extends Controller
             $userId = Auth::id(); // Ambil ID user yang sedang login.
             $memberId = $request->member_id;
             
-            // Simpan transaksi (tambahkan user_id)
+            // Simpan transaksi
             $transaksi = Transaksi::create([
                 'kode_transaksi' => $kodeTransaksi,
                 'tanggal'        => now(),
-                'nama_pembeli'   => $request->nama_pembeli,
+                'nama_pembeli'   => $request->nama_pembeli ?? 'Umum',
                 'total'          => $total,
                 'user_id'        => $userId, // user yang login
                 'member_id'      => $memberId,
@@ -80,17 +164,6 @@ class TransaksiController extends Controller
                     $stokBarang->save();
                 }
             }
-            // Tambahkan saldo member sesuai ketentuan
-            if ($memberId) {
-                $member = Member::find($memberId);
-                $persen = 0;
-                if ($total < 30000) $persen = 0.1;
-                elseif ($total <= 50000) $persen = 0.12;
-                else $persen = 0.15;
-
-                $member->saldo += $total * $persen;
-                $member->save();
-            }
         });
 
         return redirect()->back()->with('success', 'Transaksi berhasil disimpan.');
@@ -99,6 +172,15 @@ class TransaksiController extends Controller
     public function destroy($id)
     {
         $transaksi = Transaksi::with('details')->findOrFail($id);
+
+        // Validasi operator: Hanya pembuat transaksi di hari yang sama yang bisa menghapus
+        if ($transaksi->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Anda tidak diperbolehkan menghapus transaksi milik operator lain.');
+        }
+
+        if (!$transaksi->created_at->isToday()) {
+            return redirect()->back()->with('error', 'Anda tidak diperbolehkan menghapus transaksi dari hari operasional sebelumnya.');
+        }
 
         foreach ($transaksi->details as $detail) {
             // Ambil produk_jasa terkait
@@ -112,22 +194,6 @@ class TransaksiController extends Controller
                         $stokBarang->stok += $detail->jumlah;
                         $stokBarang->save();
                     }
-                }
-            }
-            if ($transaksi->member_id) {
-                $member = Member::find($transaksi->member_id);
-                if ($member) {
-                    $total = $transaksi->total;
-                    $persen = 0;
-
-                    // Hitung persentase sesuai total transaksi
-                    if ($total < 30000) $persen = 0.1;       // 5%
-                    elseif ($total <= 50000) $persen = 0.12;  // 7%
-                    else $persen = 0.15;                        // 10%
-
-                    // Kurangi saldo member
-                    $member->saldo -= $total * $persen;
-                    $member->save();
                 }
             }
         }

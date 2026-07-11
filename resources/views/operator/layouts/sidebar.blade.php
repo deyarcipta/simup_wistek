@@ -21,5 +21,12 @@
         <div>Transaksi</div>
       </a>
     </li>
+    {{-- Logbook Hari Ini --}}
+    <li class="menu-item {{ request()->is('operator/logbook*') ? 'active' : '' }}">
+      <a href="{{ route('operator.logbook.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-book-content"></i>
+        <div>Logbook Hari Ini</div>
+      </a>
+    </li>
   </ul>
 </aside>

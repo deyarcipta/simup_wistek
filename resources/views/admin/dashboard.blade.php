@@ -74,6 +74,58 @@
 </div>
 
 
+{{-- LOGBOOK UP STATS ROW --}}
+<div class="row">
+    {{-- Omzet Logbook Bulan Ini --}}
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card shadow-sm border-start border-info border-4">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3 text-info">
+                    <i class="bx bx-book-content" style="font-size: 2.5rem;"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 text-muted">Omzet Logbook UP (Bulan Ini)</h6>
+                    <h4 class="mb-0 fw-bold">Rp {{ number_format($logbookPendapatanBulanIni,0,',','.') }}</h4>
+                    <small class="text-info"><i class="bx bx-calendar"></i> Pencatatan Shift</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Uang Kas UP --}}
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card shadow-sm border-start border-success border-4">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3 text-success">
+                    <i class="bx bx-wallet" style="font-size: 2.5rem;"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 text-muted">Kas Laci UP Terakhir</h6>
+                    <h4 class="mb-0 fw-bold">Rp {{ number_format($latestLogbookKas,0,',','.') }}</h4>
+                    <small class="text-success"><i class="bx bx-lock-alt"></i> Saldo Kas Riil</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Kertas & Mesin --}}
+    <div class="col-lg-4 col-md-12 mb-3">
+        <div class="card shadow-sm border-start border-secondary border-4">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3 text-secondary">
+                    <i class="bx bx-printer" style="font-size: 2.5rem;"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 text-muted">Stok Kertas HVS</h6>
+                    <h4 class="mb-0 fw-bold text-{{ $stokKertasStatus === 'Aman' ? 'success' : 'danger' }}">{{ $stokKertasStatus }}</h4>
+                    <small class="text-secondary">Status Hari Terakhir</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="row">
     {{-- Grafik Penjualan --}}
     <div class="col-lg-8 mb-3">
@@ -103,6 +155,20 @@
                     <li class="list-group-item">Semua stok aman</li>
                 @endforelse
             </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {{-- Grafik Omzet Logbook UP --}}
+    <div class="col-lg-12 mb-3">
+        <div class="card shadow">
+            <div class="card-header fw-bold text-dark">
+                <i class="bx bx-bar-chart-alt-2"></i> Grafik Pendapatan Omzet Logbook UP (6 Bulan Terakhir)
+            </div>
+            <div class="card-body">
+                <canvas id="grafikLogbook" height="80"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -158,6 +224,28 @@ var chart = new Chart(ctx, {
             borderColor: '#36A2EB',
             data: {!! json_encode($dataPenjualan) !!}
         }]
+    }
+});
+
+var ctxLogbook = document.getElementById('grafikLogbook').getContext('2d');
+var chartLogbook = new Chart(ctxLogbook, {
+    type: 'bar',
+    data: {
+        labels: {!! json_encode($bulanPenjualan) !!},
+        datasets: [{
+            label: 'Omzet Logbook UP',
+            backgroundColor: 'rgba(40, 167, 69, 0.2)',
+            borderColor: '#28a745',
+            borderWidth: 2,
+            data: {!! json_encode($dataLogbook) !!}
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
     }
 });
 </script>

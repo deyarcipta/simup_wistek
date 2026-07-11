@@ -35,6 +35,8 @@
     </script>
 
     <link rel="stylesheet" href="{{ asset('vendor/fonts/iconify-icons.css') }}" />
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
     <!-- Core CSS -->
     <!-- build:css assets/vendor/css/theme.css  -->
@@ -110,5 +112,35 @@
 
     <!-- Page JS -->
     <script src="{{ asset('js/dashboards-analytics.js') }}"></script>
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: '{{ session('success') }}',
+        timer: 2000,
+        showConfirmButton: false,
+        didOpen: () => {
+            const swalContainer = document.querySelector('.swal2-container');
+            if(swalContainer) swalContainer.style.zIndex = '20000';
+        }
+    })
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: '{{ session('error') }}',
+        didOpen: () => {
+            const swalContainer = document.querySelector('.swal2-container');
+            if(swalContainer) swalContainer.style.zIndex = '20000';
+        }
+    })
+</script>
+@endif
 </body>
 </html>

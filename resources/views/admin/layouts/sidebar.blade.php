@@ -20,6 +20,14 @@
       </a>
     </li>
 
+    {{-- Logbook UP --}}
+    <li class="menu-item {{ request()->is('admin/logbook*') ? 'active' : '' }}">
+      <a href="{{ route('admin.logbook.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-book-content"></i>
+        <div>Logbook UP</div>
+      </a>
+    </li>
+
     {{-- Manajemen Data --}}
     <li class="menu-item {{ request()->is('admin/produk-jasa*') || request()->is('admin/stok-barang*') ? 'open active' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -105,25 +113,7 @@
         </ul>
     </li>
 
-    {{-- Kelola Member --}}
-    <li class="menu-item {{ request()->is('admin/data-member*') || request()->is('admin/pencairan*') ? 'open active' : '' }}">
-        <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-id-card"></i>
-            <div>Kelola Member</div>
-        </a>
-        <ul class="menu-sub">
-          <li class="menu-item {{ request()->is('admin/data-member*') ? 'active' : '' }}">
-            <a href="{{ url('/admin/data-member') }}" class="menu-link">
-              <div>Kelola Member</div>
-            </a>
-          </li>
-          <li class="menu-item {{ request()->is('admin/pencairan*') ? 'active' : '' }}">
-            <a href="{{ url('/admin/pencairan') }}" class="menu-link">
-              <div>Pencairan Saldo</div>
-            </a>
-          </li>
-        </ul>
-    </li>
+
 
     {{-- Pengaturan --}}
     <li class="menu-item {{ request()->is('admin/pengaturan*') ? 'active' : '' }}">

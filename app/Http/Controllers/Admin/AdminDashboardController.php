@@ -7,6 +7,8 @@ use App\Models\Transaksi;
 use App\Models\GajiKaryawan;
 use App\Models\PengeluaranLain;
 use App\Models\StokBarang;
+use App\Models\Logbook;
+use App\Models\LogbookDetail;
 use Carbon\Carbon;
 
 class AdminDashboardController extends Controller
@@ -92,6 +94,7 @@ class AdminDashboardController extends Controller
         // =========================
         $bulanPenjualan = [];
         $dataPenjualan = [];
+        $dataLogbook = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $bulan = Carbon::now()->subMonths($i);
@@ -102,7 +105,27 @@ class AdminDashboardController extends Controller
                 ->sum('total');
 
             $dataPenjualan[] = $totalBulan;
+
+            // Omzet Logbook
+            $totalBulanLogbook = LogbookDetail::whereHas('logbook', function ($query) use ($bulan) {
+                $query->whereMonth('tanggal', $bulan->month)
+                      ->whereYear('tanggal', $bulan->year);
+            })->sum('total_uang');
+
+            $dataLogbook[] = $totalBulanLogbook;
         }
+
+        // =========================
+        // Statistik Logbook UP Harian
+        // =========================
+        $logbookPendapatanBulanIni = LogbookDetail::whereHas('logbook', function ($query) use ($bulanSekarang, $tahunSekarang) {
+            $query->whereMonth('tanggal', $bulanSekarang)
+                  ->whereYear('tanggal', $tahunSekarang);
+        })->sum('total_uang');
+
+        $latestLogbook = Logbook::where('status', 'tutup_up')->latest('tanggal')->first();
+        $latestLogbookKas = $latestLogbook ? $latestLogbook->kas_akhir : 0;
+        $stokKertasStatus = $latestLogbook ? $latestLogbook->stok_kertas : 'Aman';
 
         return view('admin.dashboard', compact(
             'pendapatanBulanIni',
@@ -116,7 +139,11 @@ class AdminDashboardController extends Controller
             'stokMenipis',
             'transaksiTerbaru',
             'bulanPenjualan',
-            'dataPenjualan'
+            'dataPenjualan',
+            'dataLogbook',
+            'logbookPendapatanBulanIni',
+            'latestLogbookKas',
+            'stokKertasStatus'
         ));
     }
 }

@@ -67,64 +67,54 @@
                         <form action="{{ route('operator.logbook.shift1') }}" method="POST" id="form-shift-1">
                             @csrf
                             
+                            @php
+                                $s1Start = $logbook->created_at;
+                                $s1End = \Carbon\Carbon::now();
+                                $s1Items = DB::table('transaksi_detail')
+                                    ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
+                                    ->join('produk_jasa', 'transaksi_detail.produk_jasa_id', '=', 'produk_jasa.id')
+                                    ->whereBetween('transaksi.created_at', [$s1Start, $s1End])
+                                    ->select(
+                                        'produk_jasa.nama as produk_nama',
+                                        'transaksi_detail.harga as unit_harga',
+                                        DB::raw('SUM(transaksi_detail.jumlah) as total_qty'),
+                                        DB::raw('SUM(transaksi_detail.subtotal) as total_subtotal')
+                                    )
+                                    ->groupBy('transaksi_detail.produk_jasa_id', 'produk_jasa.nama', 'transaksi_detail.harga')
+                                    ->get();
+                                $s1Total = $s1Items->sum('total_subtotal');
+                            @endphp
+
                             <div class="p-3 bg-light rounded-3 mb-4">
                                 <h6 class="fw-bold text-dark mb-3"><i class="bx bx-receipt"></i> Rincian Transaksi Shift 1 <span class="badge bg-label-primary ms-1">Otomatis dari POS</span></h6>
                                 
-                                {{-- Print --}}
-                                <div class="row align-items-center mb-3">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Print Hitam Putih (lbr)</label>
-                                        <small class="d-block text-muted">Tarif: Rp {{ number_format($tarifPrint,0,',','.') }}</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <input type="number" name="jumlah_print" id="s1-print" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                               value="{{ old('jumlah_print', $autoFill['print']) }}" readonly min="0" required>
-                                    </div>
-                                </div>
-
-                                {{-- Fotokopi --}}
-                                <div class="row align-items-center mb-3">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Fotokopi Hitam (lbr)</label>
-                                        <small class="d-block text-muted">Tarif: Rp {{ number_format($tarifFotokopi,0,',','.') }}</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <input type="number" name="jumlah_fotokopi" id="s1-copy" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                               value="{{ old('jumlah_fotokopi', $autoFill['fotokopi']) }}" readonly min="0" required>
-                                    </div>
-                                </div>
-
-                                {{-- Jilid --}}
-                                <div class="row align-items-center mb-3">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Jilid Makalah (buku)</label>
-                                        <small class="d-block text-muted">Tarif: Rp {{ number_format($tarifJilid,0,',','.') }}</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <input type="number" name="jumlah_jilid" id="s1-jilid" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                               value="{{ old('jumlah_jilid', $autoFill['jilid']) }}" readonly min="0" required>
-                                    </div>
-                                </div>
-
-                                {{-- Pendapatan Lainnya --}}
-                                <div class="row align-items-center">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Pendapatan Lain (Retail/Pulpen/dll)</label>
-                                        <small class="d-block text-muted">Total transaksi produk & jasa lain</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <div class="input-group">
-                                            <span class="input-group-text">Rp</span>
-                                            <input type="number" name="pendapatan_lain" id="s1-lain" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                                   value="{{ old('pendapatan_lain', $autoFill['lain']) }}" readonly min="0" required>
+                                @forelse($s1Items as $item)
+                                    <div class="row align-items-center mb-3">
+                                        <div class="col-sm-5 col-7">
+                                            <div class="fw-semibold text-dark" style="font-size: 0.9rem; line-height: 1.2; max-height: 2.4em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="{{ $item->produk_nama }}">
+                                                {{ $item->produk_nama }}
+                                            </div>
+                                            <small class="d-block text-muted">Tarif: Rp {{ number_format($item->unit_harga, 0, ',', '.') }}</small>
+                                        </div>
+                                        <div class="col-sm-7 col-5">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control bg-white text-dark fw-bold text-center" 
+                                                       value="{{ $item->total_qty }}" readonly>
+                                                <span class="input-group-text">pcs</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @empty
+                                    <div class="text-center text-muted py-3">
+                                        <i class="bx bx-info-circle mb-1" style="font-size: 1.5rem;"></i>
+                                        <p class="mb-0 italic" style="font-size: 0.85rem;">Belum ada transaksi pada shift ini.</p>
+                                    </div>
+                                @endforelse
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center p-3 border rounded-3 mb-4 bg-white">
                                 <span class="fw-semibold text-muted">Total Pendapatan Shift 1:</span>
-                                <span class="h4 mb-0 fw-bold text-warning" id="total-shift-1">Rp 0</span>
+                                <span class="h4 mb-0 fw-bold text-warning" id="total-shift-1">Rp {{ number_format($s1Total, 0, ',', '.') }}</span>
                             </div>
 
                             <button type="submit" class="btn btn-warning btn-lg w-100 text-dark fw-bold shadow">
@@ -155,7 +145,25 @@
                                 <h6 class="fw-bold mb-2 text-info"><i class="bx bx-check-double"></i> Laporan Shift 1 Pagi:</h6>
                                 <ul class="mb-0 text-dark-50 ps-3" style="font-size: 0.9rem;">
                                     <li>Operator: <strong>{{ $shift1->user->name ?? '-' }}</strong></li>
-                                    <li>Pekerjaan: {{ $shift1->jumlah_print }} Print, {{ $shift1->jumlah_fotokopi }} Fotokopi, {{ $shift1->jumlah_jilid }} Jilid</li>
+                                    @php
+                                        $s1CompletedTime = $shift1->created_at;
+                                        $s1ItemsCompleted = DB::table('transaksi_detail')
+                                            ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
+                                            ->join('produk_jasa', 'transaksi_detail.produk_jasa_id', '=', 'produk_jasa.id')
+                                            ->whereBetween('transaksi.created_at', [$logbook->created_at, $s1CompletedTime])
+                                            ->select(
+                                                'produk_jasa.nama as produk_nama',
+                                                DB::raw('SUM(transaksi_detail.jumlah) as total_qty')
+                                            )
+                                            ->groupBy('transaksi_detail.produk_jasa_id', 'produk_nama')
+                                            ->get();
+                                        $s1TextItems = [];
+                                        foreach ($s1ItemsCompleted as $item) {
+                                            $s1TextItems[] = $item->total_qty . ' ' . $item->produk_nama;
+                                        }
+                                        $s1Text = count($s1TextItems) > 0 ? implode(', ', $s1TextItems) : 'Tidak ada transaksi';
+                                    @endphp
+                                    <li>Pekerjaan: {{ $s1Text }}</li>
                                     <li>Total Kas Shift 1: <strong>Rp {{ number_format($shift1->total_uang, 0, ',', '.') }}</strong></li>
                                 </ul>
                             </div>
@@ -206,7 +214,25 @@
                                 <h6 class="fw-bold mb-2 text-info"><i class="bx bx-check-double"></i> Data Operasional Shift 1 Pagi:</h6>
                                 <ul class="mb-0 text-dark-50 ps-3" style="font-size: 0.9rem;">
                                     <li>Operator: <strong>{{ $shift1->user->name ?? '-' }}</strong></li>
-                                    <li>Pekerjaan: {{ $shift1->jumlah_print }} Print, {{ $shift1->jumlah_fotokopi }} Fotokopi, {{ $shift1->jumlah_jilid }} Jilid</li>
+                                    @php
+                                        $s1CompletedTime = $shift1->created_at;
+                                        $s1ItemsCompleted = DB::table('transaksi_detail')
+                                            ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
+                                            ->join('produk_jasa', 'transaksi_detail.produk_jasa_id', '=', 'produk_jasa.id')
+                                            ->whereBetween('transaksi.created_at', [$logbook->created_at, $s1CompletedTime])
+                                            ->select(
+                                                'produk_jasa.nama as produk_nama',
+                                                DB::raw('SUM(transaksi_detail.jumlah) as total_qty')
+                                            )
+                                            ->groupBy('transaksi_detail.produk_jasa_id', 'produk_nama')
+                                            ->get();
+                                        $s1TextItems = [];
+                                        foreach ($s1ItemsCompleted as $item) {
+                                            $s1TextItems[] = $item->total_qty . ' ' . $item->produk_nama;
+                                        }
+                                        $s1Text = count($s1TextItems) > 0 ? implode(', ', $s1TextItems) : 'Tidak ada transaksi';
+                                    @endphp
+                                    <li>Pekerjaan: {{ $s1Text }}</li>
                                     <li>Uang Diterima: <strong>Rp {{ number_format($shift1->total_uang, 0, ',', '.') }}</strong></li>
                                 </ul>
                             </div>
@@ -215,64 +241,55 @@
                         <form action="{{ route('operator.logbook.shift2') }}" method="POST" id="form-shift-2">
                             @csrf
                             
+                            @php
+                                $shift1Detail = $logbook->details->where('shift_id', 1)->first();
+                                $s2Start = $shift1Detail ? $shift1Detail->created_at : $logbook->created_at;
+                                $s2End = \Carbon\Carbon::now();
+                                $s2Items = DB::table('transaksi_detail')
+                                    ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
+                                    ->join('produk_jasa', 'transaksi_detail.produk_jasa_id', '=', 'produk_jasa.id')
+                                    ->whereBetween('transaksi.created_at', [$s2Start, $s2End])
+                                    ->select(
+                                        'produk_jasa.nama as produk_nama',
+                                        'transaksi_detail.harga as unit_harga',
+                                        DB::raw('SUM(transaksi_detail.jumlah) as total_qty'),
+                                        DB::raw('SUM(transaksi_detail.subtotal) as total_subtotal')
+                                    )
+                                    ->groupBy('transaksi_detail.produk_jasa_id', 'produk_jasa.nama', 'transaksi_detail.harga')
+                                    ->get();
+                                $s2Total = $s2Items->sum('total_subtotal');
+                            @endphp
+
                             <div class="p-3 bg-light rounded-3 mb-4">
                                 <h6 class="fw-bold text-dark mb-3"><i class="bx bx-receipt"></i> Rincian Transaksi Shift 2 <span class="badge bg-label-primary ms-1">Otomatis dari POS</span></h6>
                                 
-                                {{-- Print --}}
-                                <div class="row align-items-center mb-3">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Print Hitam Putih (lbr)</label>
-                                        <small class="d-block text-muted">Tarif: Rp {{ number_format($tarifPrint,0,',','.') }}</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <input type="number" name="jumlah_print" id="s2-print" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                               value="{{ old('jumlah_print', $autoFill['print']) }}" readonly min="0" required>
-                                    </div>
-                                </div>
-
-                                {{-- Fotokopi --}}
-                                <div class="row align-items-center mb-3">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Fotokopi Hitam (lbr)</label>
-                                        <small class="d-block text-muted">Tarif: Rp {{ number_format($tarifFotokopi,0,',','.') }}</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <input type="number" name="jumlah_fotokopi" id="s2-copy" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                               value="{{ old('jumlah_fotokopi', $autoFill['fotokopi']) }}" readonly min="0" required>
-                                    </div>
-                                </div>
-
-                                {{-- Jilid --}}
-                                <div class="row align-items-center mb-3">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Jilid Makalah (buku)</label>
-                                        <small class="d-block text-muted">Tarif: Rp {{ number_format($tarifJilid,0,',','.') }}</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <input type="number" name="jumlah_jilid" id="s2-jilid" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                               value="{{ old('jumlah_jilid', $autoFill['jilid']) }}" readonly min="0" required>
-                                    </div>
-                                </div>
-
-                                {{-- Pendapatan Lainnya --}}
-                                <div class="row align-items-center">
-                                    <div class="col-sm-5">
-                                        <label class="form-label mb-sm-0">Pendapatan Lain (Retail/Pulpen/dll)</label>
-                                        <small class="d-block text-muted">Total transaksi produk & jasa lain</small>
-                                    </div>
-                                    <div class="col-sm-7">
-                                        <div class="input-group">
-                                            <span class="input-group-text">Rp</span>
-                                            <input type="number" name="pendapatan_lain" id="s2-lain" class="form-control calc-input bg-white text-dark fw-semibold" 
-                                                   value="{{ old('pendapatan_lain', $autoFill['lain']) }}" readonly min="0" required>
+                                @forelse($s2Items as $item)
+                                    <div class="row align-items-center mb-3">
+                                        <div class="col-sm-5 col-7">
+                                            <div class="fw-semibold text-dark" style="font-size: 0.9rem; line-height: 1.2; max-height: 2.4em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="{{ $item->produk_nama }}">
+                                                {{ $item->produk_nama }}
+                                            </div>
+                                            <small class="d-block text-muted">Tarif: Rp {{ number_format($item->unit_harga, 0, ',', '.') }}</small>
+                                        </div>
+                                        <div class="col-sm-7 col-5">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control bg-white text-dark fw-bold text-center" 
+                                                       value="{{ $item->total_qty }}" readonly>
+                                                <span class="input-group-text">pcs</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @empty
+                                    <div class="text-center text-muted py-3">
+                                        <i class="bx bx-info-circle mb-1" style="font-size: 1.5rem;"></i>
+                                        <p class="mb-0 italic" style="font-size: 0.85rem;">Belum ada transaksi pada shift ini.</p>
+                                    </div>
+                                @endforelse
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center p-3 border rounded-3 mb-4 bg-white">
                                 <span class="fw-semibold text-muted">Total Pendapatan Shift 2:</span>
-                                <span class="h4 mb-0 fw-bold text-info" id="total-shift-2">Rp 0</span>
+                                <span class="h4 mb-0 fw-bold text-info" id="total-shift-2">Rp {{ number_format($s2Total, 0, ',', '.') }}</span>
                             </div>
 
                             <div class="divider my-4"><div class="divider-text fw-bold">PENUTUPAN UNIT PRODUKSI</div></div>
@@ -371,86 +388,31 @@
     </div>
 </div>
 
-{{-- SCRIPT JAVASCRIPT FOR AUTO CALCULATE --}}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const tarifPrint = {{ $tarifPrint }};
-        const tarifCopy = {{ $tarifFotokopi }};
-        const tarifJilid = {{ $tarifJilid }};
+        const totalS2 = parseFloat(@json($logbook && isset($s2Total) ? $s2Total : 0));
 
-        // --- SHIFT 1 CALCULATION ---
-        const s1Print = document.getElementById('s1-print');
-        const s1Copy = document.getElementById('s1-copy');
-        const s1Jilid = document.getElementById('s1-jilid');
-        const s1Lain = document.getElementById('s1-lain');
-        const totalS1Display = document.getElementById('total-shift-1');
-
-        function calculateShift1() {
-            if (!totalS1Display) return;
-            const printVal = parseInt(s1Print.value) || 0;
-            const copyVal = parseInt(s1Copy.value) || 0;
-            const jilidVal = parseInt(s1Jilid.value) || 0;
-            const lainVal = parseFloat(s1Lain.value) || 0;
-
-            const total = (printVal * tarifPrint) + (copyVal * tarifCopy) + (jilidVal * tarifJilid) + lainVal;
-            totalS1Display.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(total);
-        }
-
-        if (s1Print) {
-            s1Print.addEventListener('input', calculateShift1);
-            s1Copy.addEventListener('input', calculateShift1);
-            s1Jilid.addEventListener('input', calculateShift1);
-            s1Lain.addEventListener('input', calculateShift1);
-            calculateShift1(); // Initial calc
-        }
-
-        // --- SHIFT 2 CALCULATION ---
-        const s2Print = document.getElementById('s2-print');
-        const s2Copy = document.getElementById('s2-copy');
-        const s2Jilid = document.getElementById('s2-jilid');
-        const s2Lain = document.getElementById('s2-lain');
-        const totalS2Display = document.getElementById('total-shift-2');
+        // --- SHIFT 2 EXPECTED CASH ---
         const kasAkhirInput = document.getElementById('kas_akhir');
         const kasDiharapkanInfo = document.getElementById('kas_diharapkan_info');
 
-        // Parameter Kas Awal & Shift 1 Total untuk melengkapi info Kas Akhir
-        const kasAwal = @json($logbook ? $logbook->kas_awal : 0);
-        const shift1Total = @json($logbook && isset($shift1) ? $shift1->total_uang : 0);
+        const kasAwal = parseFloat(@json($logbook ? $logbook->kas_awal : 0));
+        const shift1Total = parseFloat(@json($logbook && isset($shift1) ? $shift1->total_uang : 0));
 
-        function calculateShift2() {
-            if (!totalS2Display) return;
-            const printVal = parseInt(s2Print.value) || 0;
-            const copyVal = parseInt(s2Copy.value) || 0;
-            const jilidVal = parseInt(s2Jilid.value) || 0;
-            const lainVal = parseFloat(s2Lain.value) || 0;
+        const expectedCash = kasAwal + shift1Total + totalS2;
 
-            const totalS2 = (printVal * tarifPrint) + (copyVal * tarifCopy) + (jilidVal * tarifJilid) + lainVal;
-            totalS2Display.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(totalS2);
-
-            // Tampilkan rekomendasi Kas Akhir yang diharapkan
-            const expectedCash = parseFloat(kasAwal) + parseFloat(shift1Total) + parseFloat(totalS2);
+        if (kasDiharapkanInfo) {
             kasDiharapkanInfo.innerHTML = `Jumlah uang kas laci yang seharusnya: <strong>Rp ${new Intl.NumberFormat('id-ID').format(expectedCash)}</strong>`;
-            
-            // Set default value kas_akhir jika belum diedit manual oleh user
-            if (kasAkhirInput && kasAkhirInput.dataset.auto !== 'false') {
+        }
+        
+        if (kasAkhirInput) {
+            if (kasAkhirInput.dataset.auto !== 'false') {
                 kasAkhirInput.value = expectedCash;
                 kasAkhirInput.dataset.auto = 'true';
             }
-        }
-
-        if (s2Print) {
-            s2Print.addEventListener('input', calculateShift2);
-            s2Copy.addEventListener('input', calculateShift2);
-            s2Jilid.addEventListener('input', calculateShift2);
-            s2Lain.addEventListener('input', calculateShift2);
-            
-            if (kasAkhirInput) {
-                kasAkhirInput.addEventListener('input', () => {
-                    kasAkhirInput.dataset.auto = 'false';
-                });
-            }
-            
-            calculateShift2(); // Initial calc
+            kasAkhirInput.addEventListener('input', () => {
+                kasAkhirInput.dataset.auto = 'false';
+            });
         }
     });
 </script>

@@ -92,12 +92,22 @@ class AdminLaporanController extends Controller
         $totalPengeluaran = $totalGaji + $totalPengeluaranLain;
         $shu = $totalPemasukan - $totalPengeluaran;
 
-        $pembagian = [
-            ['penerima' => 'Jurusan TKJ',   'persentase' => 40, 'nominal' => $shu * 0.40],
-            ['penerima' => 'Unit Produksi', 'persentase' => 30, 'nominal' => $shu * 0.30],
-            ['penerima' => 'Sekolah',       'persentase' => 20, 'nominal' => $shu * 0.20],
-            ['penerima' => 'Honor Pegawai', 'persentase' => 10, 'nominal' => $shu * 0.10],
+        $pengaturan = \App\Models\Pengaturan::first();
+        $rules = $pengaturan ? $pengaturan->getShuPembagianOrDefault() : [
+            ['penerima' => 'Jurusan TKJ',   'persentase' => 40],
+            ['penerima' => 'Unit Produksi', 'persentase' => 30],
+            ['penerima' => 'Sekolah',       'persentase' => 20],
+            ['penerima' => 'Honor Pegawai', 'persentase' => 10],
         ];
+
+        $pembagian = [];
+        foreach ($rules as $rule) {
+            $pembagian[] = [
+                'penerima'   => $rule['penerima'],
+                'persentase' => $rule['persentase'],
+                'nominal'    => $shu * ($rule['persentase'] / 100),
+            ];
+        }
 
         return view('admin.laporan.sisa_hasil_usaha', compact(
             'startDate', 'endDate', 'shu', 'pembagian', 'totalPemasukan', 'totalPengeluaran'
@@ -116,12 +126,22 @@ class AdminLaporanController extends Controller
         $totalPengeluaran = $totalGaji + $totalPengeluaranLain;
         $shu = $totalPemasukan - $totalPengeluaran;
 
-        $pembagian = [
-            ['penerima' => 'Jurusan TKJ',   'persentase' => 40, 'nominal' => $shu * 0.40],
-            ['penerima' => 'Unit Produksi', 'persentase' => 30, 'nominal' => $shu * 0.30],
-            ['penerima' => 'Sekolah',       'persentase' => 20, 'nominal' => $shu * 0.20],
-            ['penerima' => 'Honor Pegawai', 'persentase' => 10, 'nominal' => $shu * 0.10],
+        $pengaturan = \App\Models\Pengaturan::first();
+        $rules = $pengaturan ? $pengaturan->getShuPembagianOrDefault() : [
+            ['penerima' => 'Jurusan TKJ',   'persentase' => 40],
+            ['penerima' => 'Unit Produksi', 'persentase' => 30],
+            ['penerima' => 'Sekolah',       'persentase' => 20],
+            ['penerima' => 'Honor Pegawai', 'persentase' => 10],
         ];
+
+        $pembagian = [];
+        foreach ($rules as $rule) {
+            $pembagian[] = [
+                'penerima'   => $rule['penerima'],
+                'persentase' => $rule['persentase'],
+                'nominal'    => $shu * ($rule['persentase'] / 100),
+            ];
+        }
 
         $pdf = Pdf::loadView('admin.laporan.sisa_hasil_usaha_pdf', compact(
             'startDate', 'endDate', 'shu', 'pembagian', 'totalPemasukan', 'totalPengeluaran'

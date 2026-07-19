@@ -85,7 +85,7 @@
                                                     {{ strtoupper($item->jenis) }}
                                                 </span>
                                                 
-                                                <div class="mt-2 mb-1 fw-bold text-dark text-truncate" title="{{ $item->nama }}" style="font-size: 0.95rem;">
+                                                <div class="mt-2 mb-1 fw-bold text-dark" title="{{ $item->nama }}" style="font-size: 0.9rem; line-height: 1.2; min-height: 2.4em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                                                     {{ $item->nama }}
                                                 </div>
                                                 
@@ -377,7 +377,7 @@
             html += `
                 <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center border-bottom">
                     <div style="max-width: 60%;">
-                        <div class="fw-bold text-dark text-truncate">${item.name}</div>
+                        <div class="fw-bold text-dark" style="font-size: 0.9rem; line-height: 1.2; max-height: 2.4em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.name}</div>
                         <small class="text-muted">Rp ${formatRupiah(item.price)}</small>
                     </div>
                     <div class="d-flex align-items-center gap-2">

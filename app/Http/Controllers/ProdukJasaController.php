@@ -9,7 +9,7 @@ class ProdukJasaController extends Controller
 {
     public function index()
     {
-        $produkJasa = ProdukJasa::with('stokBarang')->orderBy('created_at', 'desc')->get();
+        $produkJasa = ProdukJasa::with('stokBarang')->orderBy('created_at', 'desc')->paginate(10);
         return view('operator.produk_jasa.index', compact('produkJasa'));
     }
 

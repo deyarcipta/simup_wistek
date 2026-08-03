@@ -13,7 +13,7 @@ class AdminKelolaUserController extends Controller
     {
         $users = User::whereIn('role', ['admin', 'operator'])
                         ->orderBy('name')
-                        ->get();
+                        ->paginate(10);
         return view('admin.kelola_user.index', compact('users'));
     }
 

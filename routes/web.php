@@ -135,6 +135,8 @@ Route::middleware(['auth', 'role:operator'])
         Route::post('logbook/shift1', [LogbookController::class, 'submitShift1'])->name('operator.logbook.shift1');
         Route::post('logbook/start-shift2', [LogbookController::class, 'startShift2'])->name('operator.logbook.start_shift2');
         Route::post('logbook/shift2', [LogbookController::class, 'submitShift2'])->name('operator.logbook.shift2');
+        Route::post('logbook/start-shift3', [LogbookController::class, 'startShift3'])->name('operator.logbook.start_shift3');
+        Route::post('logbook/shift3', [LogbookController::class, 'submitShift3'])->name('operator.logbook.shift3');
     });
 
  

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller; 
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
-use App\Models\GajiKaryawan;
 use App\Models\PengeluaranLain;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -25,16 +24,6 @@ class AdminLaporanController extends Controller
                 'kredit'     => 0
             ]);
 
-        // Ambil pengeluaran gaji
-        $gaji = GajiKaryawan::whereBetween('tanggal', [$startDate, $endDate])
-            ->get()
-            ->map(fn($item) => [
-                'tanggal'    => Carbon::parse($item->tanggal)->format('Y-m-d'),
-                'keterangan' => 'Gaji Karyawan - ' . $item->nama_karyawan,
-                'debit'      => 0,
-                'kredit'     => $item->total_gaji
-            ]);
-
         // Ambil pengeluaran lain
         $pengeluaran = PengeluaranLain::whereBetween('tanggal', [$startDate, $endDate])
             ->get()
@@ -46,7 +35,7 @@ class AdminLaporanController extends Controller
             ]);
 
         // Gabungkan & urutkan
-        $bukuBesar = $pemasukan->concat($gaji)->concat($pengeluaran)->sortBy('tanggal')->values();
+        $bukuBesar = $pemasukan->concat($pengeluaran)->sortBy('tanggal')->values();
 
         // Hitung saldo berjalan
         $saldo = 0;
@@ -86,10 +75,8 @@ class AdminLaporanController extends Controller
         $endDate   = $request->end_date ?? now()->endOfMonth()->toDateString();
 
         $totalPemasukan = Transaksi::whereBetween('tanggal', [$startDate, $endDate])->sum('total');
-        $totalGaji = GajiKaryawan::whereBetween('tanggal', [$startDate, $endDate])->sum('total_gaji');
-        $totalPengeluaranLain = PengeluaranLain::whereBetween('tanggal', [$startDate, $endDate])->sum('total');
+        $totalPengeluaran = PengeluaranLain::whereBetween('tanggal', [$startDate, $endDate])->sum('total');
 
-        $totalPengeluaran = $totalGaji + $totalPengeluaranLain;
         $shu = $totalPemasukan - $totalPengeluaran;
 
         $pengaturan = \App\Models\Pengaturan::first();
@@ -120,10 +107,8 @@ class AdminLaporanController extends Controller
         $endDate   = $request->end_date ?? now()->endOfMonth()->toDateString();
 
         $totalPemasukan = Transaksi::whereBetween('tanggal', [$startDate, $endDate])->sum('total');
-        $totalGaji = GajiKaryawan::whereBetween('tanggal', [$startDate, $endDate])->sum('total_gaji');
-        $totalPengeluaranLain = PengeluaranLain::whereBetween('tanggal', [$startDate, $endDate])->sum('total');
+        $totalPengeluaran = PengeluaranLain::whereBetween('tanggal', [$startDate, $endDate])->sum('total');
 
-        $totalPengeluaran = $totalGaji + $totalPengeluaranLain;
         $shu = $totalPemasukan - $totalPengeluaran;
 
         $pengaturan = \App\Models\Pengaturan::first();

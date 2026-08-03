@@ -11,7 +11,7 @@ class AdminStokBarangController extends Controller
 {
     public function index()
     {
-        $stokBarang = StokBarang::latest()->get();
+        $stokBarang = StokBarang::latest()->paginate(10);
         return view('admin.stok_barang.index', compact('stokBarang'));
     }
 

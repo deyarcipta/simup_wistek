@@ -92,8 +92,24 @@
                                 </td>
                                 <td>Rp {{ number_format($logbook->kas_awal, 0, ',', '.') }}</td>
                                 <td>{{ $logbook->kas_akhir ? 'Rp ' . number_format($logbook->kas_akhir, 0, ',', '.') : '-' }}</td>
-                                <td>Rp {{ number_format($s1?->total_uang ?? 0, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($s2?->total_uang ?? 0, 0, ',', '.') }}</td>
+                                <td>
+                                    Rp {{ number_format($s1?->total_uang ?? 0, 0, ',', '.') }}
+                                    @if($s1)
+                                        @php $s1Late = $s1->getLatenessInfo(); @endphp
+                                        <small class="d-block {{ $s1Late['is_late'] ? 'text-danger fw-semibold' : 'text-success' }}" style="font-size: 0.72rem;">
+                                            <i class="bx bx-time"></i> {{ $s1Late['status_text'] }}
+                                        </small>
+                                    @endif
+                                </td>
+                                <td>
+                                    Rp {{ number_format($s2?->total_uang ?? 0, 0, ',', '.') }}
+                                    @if($s2)
+                                        @php $s2Late = $s2->getLatenessInfo(); @endphp
+                                        <small class="d-block {{ $s2Late['is_late'] ? 'text-danger fw-semibold' : 'text-success' }}" style="font-size: 0.72rem;">
+                                            <i class="bx bx-time"></i> {{ $s2Late['status_text'] }}
+                                        </small>
+                                    @endif
+                                </td>
                                 <td class="fw-bold text-primary">Rp {{ number_format($totalHarian, 0, ',', '.') }}</td>
                                 <td>
                                     @if($logbook->stok_kertas === 'Aman')
@@ -126,6 +142,8 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{ $logbooks->links() }}
             </div>
         </div>
     </div>

@@ -36,7 +36,7 @@
                         <tbody>
                             @forelse ($produkJasa as $item)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $produkJasa->firstItem() + $loop->index }}</td>
                                     <td>{{ $item->nama }}</td>
                                     <td><span class="badge bg-label-info">{{ ucfirst($item->jenis) }}</span></td>
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
@@ -48,26 +48,17 @@
                                         @endif
                                     </td>
                                     <td>{{ $item->satuan ?? '-' }}</td>
-                                    {{-- <td>
-                                        <button class="btn btn-warning btn-sm btnEdit" data-id="{{ $item->id }}">
-                                            <i class="bx bx-edit"></i>
-                                        </button>
-                                        <form action="{{ route('produk-jasa.destroy', $item->id) }}" method="POST" style="display:inline-block;">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        </form>
-                                    </td> --}}
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">Belum ada data</td>
+                                    <td colspan="6" class="text-center">Belum ada data</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
+
+                {{ $produkJasa->links() }}
             </div>
         </div>
     </div>

@@ -20,7 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-         view()->composer('*', function ($view) {
+        \Illuminate\Pagination\Paginator::useBootstrapFive();
+
+        view()->composer('*', function ($view) {
             $pengaturan = Pengaturan::first();
             $view->with('namaAplikasi', $pengaturan->nama_aplikasi ?? config('app.name'));
             $view->with('logoAplikasi', $pengaturan->logo ?? null);

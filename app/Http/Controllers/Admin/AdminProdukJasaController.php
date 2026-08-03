@@ -11,10 +11,9 @@ class AdminProdukJasaController extends Controller
 {
     public function index()
     {
-        $produkJasa = ProdukJasa::with('stokBarang')->orderBy('created_at', 'desc')->get();
+        $produkJasa = ProdukJasa::with('stokBarang')->orderBy('created_at', 'desc')->paginate(10);
         $stokBarangList = StokBarang::all();
         return view('admin.produk_jasa.index', compact('produkJasa', 'stokBarangList'));
-
     }
 
     public function store(Request $request)

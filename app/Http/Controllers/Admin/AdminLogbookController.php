@@ -20,7 +20,8 @@ class AdminLogbookController extends Controller
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
-            ->get();
+            ->paginate(10)
+            ->appends(['bulan' => $bulan, 'tahun' => $tahun]);
 
         // Hitung total omzet bulan ini dari logbook_details
         $totalOmzet = LogbookDetail::whereHas('logbook', function ($query) use ($bulan, $tahun) {
@@ -82,6 +83,8 @@ class AdminLogbookController extends Controller
             "Expires"             => "0"
         ];
 
+        $jumlahShiftSetting = \App\Models\Pengaturan::first()?->jumlah_shift ?? 2;
+
         $columns = [
             'Tanggal', 
             'Kas Awal', 
@@ -90,26 +93,44 @@ class AdminLogbookController extends Controller
             'Shift 1 Pagi - Fotokopi', 
             'Shift 1 Pagi - Jilid', 
             'Shift 1 Pagi - Total',
-            'Shift 2 Siang - Print', 
-            'Shift 2 Siang - Fotokopi', 
-            'Shift 2 Siang - Jilid', 
-            'Shift 2 Siang - Total',
-            'Total Omzet Harian',
-            'Stok Kertas',
-            'Status Mesin'
         ];
 
-        $callback = function() use($logbooks, $columns) {
+        if ($jumlahShiftSetting >= 2) {
+            $columns[] = 'Shift 2 Siang - Print';
+            $columns[] = 'Shift 2 Siang - Fotokopi';
+            $columns[] = 'Shift 2 Siang - Jilid';
+            $columns[] = 'Shift 2 Siang - Total';
+        }
+
+        if ($jumlahShiftSetting == 3) {
+            $columns[] = 'Shift 3 Sore - Print';
+            $columns[] = 'Shift 3 Sore - Fotokopi';
+            $columns[] = 'Shift 3 Sore - Jilid';
+            $columns[] = 'Shift 3 Sore - Total';
+        }
+
+        $columns[] = 'Total Omzet Harian';
+        $columns[] = 'Stok Kertas';
+        $columns[] = 'Status Mesin';
+
+        $callback = function() use($logbooks, $columns, $jumlahShiftSetting) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
             foreach ($logbooks as $logbook) {
                 $shift1 = $logbook->details->where('shift_id', 1)->first();
                 $shift2 = $logbook->details->where('shift_id', 2)->first();
+                $shift3 = $logbook->details->where('shift_id', 3)->first();
 
-                $totalOmzet = ($shift1?->total_uang ?? 0) + ($shift2?->total_uang ?? 0);
+                $totalOmzet = ($shift1?->total_uang ?? 0);
+                if ($jumlahShiftSetting >= 2) {
+                    $totalOmzet += ($shift2?->total_uang ?? 0);
+                }
+                if ($jumlahShiftSetting == 3) {
+                    $totalOmzet += ($shift3?->total_uang ?? 0);
+                }
 
-                fputcsv($file, [
+                $row = [
                     $logbook->tanggal->format('Y-m-d'),
                     $logbook->kas_awal,
                     $logbook->kas_akhir ?? '-',
@@ -117,14 +138,27 @@ class AdminLogbookController extends Controller
                     $shift1?->jumlah_fotokopi ?? 0,
                     $shift1?->jumlah_jilid ?? 0,
                     $shift1?->total_uang ?? 0,
-                    $shift2?->jumlah_print ?? 0,
-                    $shift2?->jumlah_fotokopi ?? 0,
-                    $shift2?->jumlah_jilid ?? 0,
-                    $shift2?->total_uang ?? 0,
-                    $totalOmzet,
-                    $logbook->stok_kertas ?? '-',
-                    $logbook->status_mesin ?? '-'
-                ]);
+                ];
+
+                if ($jumlahShiftSetting >= 2) {
+                    $row[] = $shift2?->jumlah_print ?? 0;
+                    $row[] = $shift2?->jumlah_fotokopi ?? 0;
+                    $row[] = $shift2?->jumlah_jilid ?? 0;
+                    $row[] = $shift2?->total_uang ?? 0;
+                }
+
+                if ($jumlahShiftSetting == 3) {
+                    $row[] = $shift3?->jumlah_print ?? 0;
+                    $row[] = $shift3?->jumlah_fotokopi ?? 0;
+                    $row[] = $shift3?->jumlah_jilid ?? 0;
+                    $row[] = $shift3?->total_uang ?? 0;
+                }
+
+                $row[] = $totalOmzet;
+                $row[] = $logbook->stok_kertas ?? '-';
+                $row[] = $logbook->status_mesin ?? '-';
+
+                fputcsv($file, $row);
             }
 
             fclose($file);

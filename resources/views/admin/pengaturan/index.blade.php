@@ -41,6 +41,48 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Jumlah Shift Logbook</label>
+                        <select name="jumlah_shift" id="jumlah_shift_select" class="form-select">
+                            <option value="1" {{ old('jumlah_shift', $pengaturan->jumlah_shift ?? 2) == 1 ? 'selected' : '' }}>1 Shift (Langsung Tutup Hari)</option>
+                            <option value="2" {{ old('jumlah_shift', $pengaturan->jumlah_shift ?? 2) == 2 ? 'selected' : '' }}>2 Shift (Shift 1 & Shift 2)</option>
+                            <option value="3" {{ old('jumlah_shift', $pengaturan->jumlah_shift ?? 2) == 3 ? 'selected' : '' }}>3 Shift (Shift 1, Shift 2, & Shift 3)</option>
+                        </select>
+                        <small class="text-muted d-block mt-1">Menentukan alur logbook harian unit produksi Wistek.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bx bx-time me-1"></i> Toleransi Spare Waktu Keterlambatan (Menit)</label>
+                        <div class="input-group">
+                            <input type="number" name="toleransi_keterlambatan" class="form-control" value="{{ old('toleransi_keterlambatan', $pengaturan->toleransi_keterlambatan ?? 15) }}" min="0" max="120" required>
+                            <span class="input-group-text">Menit</span>
+                        </div>
+                        <small class="text-muted">Batas spare waktu toleransi sebelum operator dicatat keterlambatan.</small>
+                    </div>
+
+                    @php
+                        $jumlahShiftVal = old('jumlah_shift', $pengaturan->jumlah_shift ?? 2);
+                    @endphp
+                    <div class="card bg-light border mb-3">
+                        <div class="card-body p-3">
+                            <h6 class="fw-bold mb-2"><i class="bx bx-calendar-event me-1"></i> Jam Mulai Shift Operator</h6>
+                            <div class="row g-2" id="shift_start_inputs_row">
+                                <div class="{{ $jumlahShiftVal == 1 ? 'col-md-12' : ($jumlahShiftVal == 2 ? 'col-md-6' : 'col-md-4') }}" id="col_shift1_mulai">
+                                    <label class="form-label small mb-1 fw-semibold">Shift 1 Mulai</label>
+                                    <input type="time" name="shift1_mulai" class="form-control form-control-sm" value="{{ old('shift1_mulai', $pengaturan->shift1_mulai ?? '07:00') }}" required>
+                                </div>
+                                <div class="{{ $jumlahShiftVal == 2 ? 'col-md-6' : 'col-md-4' }}" id="col_shift2_mulai" style="{{ $jumlahShiftVal < 2 ? 'display: none;' : '' }}">
+                                    <label class="form-label small mb-1 fw-semibold">Shift 2 Mulai</label>
+                                    <input type="time" name="shift2_mulai" class="form-control form-control-sm" value="{{ old('shift2_mulai', $pengaturan->shift2_mulai ?? '11:00') }}">
+                                </div>
+                                <div class="col-md-4" id="col_shift3_mulai" style="{{ $jumlahShiftVal < 3 ? 'display: none;' : '' }}">
+                                    <label class="form-label small mb-1 fw-semibold">Shift 3 Mulai</label>
+                                    <input type="time" name="shift3_mulai" class="form-control form-control-sm" value="{{ old('shift3_mulai', $pengaturan->shift3_mulai ?? '12:00') }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Logo</label>
                         <input type="file" name="logo" class="form-control">
                         @if(!empty($pengaturan->logo))
@@ -68,7 +110,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Nama Penerima</th>
-                                    <th style="width: 130px;">Persentase</th>
+                                    <th style="width: 165px;">Persentase</th>
                                     <th style="width: 60px;" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -95,6 +137,9 @@
                                             }
                                             .shu-persentase-input {
                                                 -moz-appearance: textfield;
+                                                padding-left: 6px !important;
+                                                padding-right: 6px !important;
+                                                font-weight: 600;
                                             }
                                         </style>
                                         <div class="input-group">
@@ -200,6 +245,36 @@
                 hitungTotal();
             }
         });
+
+        // --- SHIFT HOURS & INPUT VISIBILITY PREVIEW ---
+        const shiftSelect = document.getElementById('jumlah_shift_select');
+        const colShift1 = document.getElementById('col_shift1_mulai');
+        const colShift2 = document.getElementById('col_shift2_mulai');
+        const colShift3 = document.getElementById('col_shift3_mulai');
+        
+        function updateShiftVisibility() {
+            if (!shiftSelect) return;
+            const val = parseInt(shiftSelect.value);
+
+            if (val === 1) {
+                if (colShift1) { colShift1.className = 'col-md-12'; colShift1.style.display = 'block'; }
+                if (colShift2) { colShift2.style.display = 'none'; }
+                if (colShift3) { colShift3.style.display = 'none'; }
+            } else if (val === 2) {
+                if (colShift1) { colShift1.className = 'col-md-6'; colShift1.style.display = 'block'; }
+                if (colShift2) { colShift2.className = 'col-md-6'; colShift2.style.display = 'block'; }
+                if (colShift3) { colShift3.style.display = 'none'; }
+            } else {
+                if (colShift1) { colShift1.className = 'col-md-4'; colShift1.style.display = 'block'; }
+                if (colShift2) { colShift2.className = 'col-md-4'; colShift2.style.display = 'block'; }
+                if (colShift3) { colShift3.className = 'col-md-4'; colShift3.style.display = 'block'; }
+            }
+        }
+        
+        if (shiftSelect) {
+            shiftSelect.addEventListener('change', updateShiftVisibility);
+            updateShiftVisibility();
+        }
 
         hitungTotal();
     });

@@ -11,7 +11,7 @@ class AdminPengeluaranLainController extends Controller
 {
     public function index()
     {
-        $pengeluaran = PengeluaranLain::all();
+        $pengeluaran = PengeluaranLain::latest('tanggal')->paginate(10);
         $piutangList = Piutang::where('sisa_nominal', '>', 0)->get();
 
         return view('admin.pengeluaran.lain.index', compact('pengeluaran', 'piutangList'));

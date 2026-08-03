@@ -28,6 +28,11 @@ class AdminPengaturanController extends Controller
             'shu_penerima.*' => 'required_with:shu_persentase.*|string|max:255',
             'shu_persentase' => 'nullable|array',
             'shu_persentase.*' => 'required_with:shu_penerima.*|numeric|min:0|max:100',
+            'jumlah_shift'   => 'required|integer|in:1,2,3',
+            'toleransi_keterlambatan' => 'nullable|integer|min:0|max:120',
+            'shift1_mulai'   => 'nullable|string|max:10',
+            'shift2_mulai'   => 'nullable|string|max:10',
+            'shift3_mulai'   => 'nullable|string|max:10',
         ]);
 
         $penerimaList = $request->input('shu_penerima', []);
@@ -63,26 +68,25 @@ class AdminPengaturanController extends Controller
             $logoPath = $pengaturan->logo ?? null;
         }
 
+        $dataToSave = [
+            'nama_aplikasi' => $request->nama_aplikasi,
+            'nama_sekolah'  => $request->nama_sekolah,
+            'alamat'        => $request->alamat,
+            'telepon'       => $request->telepon,
+            'email'         => $request->email,
+            'logo'          => $logoPath,
+            'shu_pembagian' => $shuPembagian,
+            'jumlah_shift'  => $request->jumlah_shift,
+            'toleransi_keterlambatan' => $request->input('toleransi_keterlambatan', 15),
+            'shift1_mulai'  => $request->input('shift1_mulai', '07:00'),
+            'shift2_mulai'  => $request->input('shift2_mulai', '11:00'),
+            'shift3_mulai'  => $request->input('shift3_mulai', '12:00'),
+        ];
+
         if ($pengaturan) {
-            $pengaturan->update([
-                'nama_aplikasi' => $request->nama_aplikasi,
-                'nama_sekolah'  => $request->nama_sekolah,
-                'alamat'        => $request->alamat,
-                'telepon'       => $request->telepon,
-                'email'         => $request->email,
-                'logo'          => $logoPath,
-                'shu_pembagian' => $shuPembagian,
-            ]);
+            $pengaturan->update($dataToSave);
         } else {
-            Pengaturan::create([
-                'nama_aplikasi' => $request->nama_aplikasi,
-                'nama_sekolah'  => $request->nama_sekolah,
-                'alamat'        => $request->alamat,
-                'telepon'       => $request->telepon,
-                'email'         => $request->email,
-                'logo'          => $logoPath,
-                'shu_pembagian' => $shuPembagian,
-            ]);
+            Pengaturan::create($dataToSave);
         }
 
         return back()->with('success', 'Pengaturan berhasil diperbarui');

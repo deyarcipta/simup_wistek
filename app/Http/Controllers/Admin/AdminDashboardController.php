@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
-use App\Models\GajiKaryawan;
 use App\Models\PengeluaranLain;
 use App\Models\StokBarang;
 use App\Models\Logbook;
@@ -39,27 +38,15 @@ class AdminDashboardController extends Controller
         }
 
         // =========================
-        // Pengeluaran
+        // Pengeluaran (Hanya PengeluaranLain)
         // =========================
-        $pengeluaranBulanIniGajiKaryawan = GajiKaryawan::whereMonth('tanggal', $bulanSekarang)
-            ->whereYear('tanggal', $tahunSekarang)
-            ->sum('total_gaji');
-
-        $pengeluaranBulanLaluGajiKaryawan = GajiKaryawan::whereMonth('tanggal', $bulanLalu)
-            ->whereYear('tanggal', $tahunBulanLalu)
-            ->sum('total_gaji');
-
-        $pengeluaranBulanIniPengeluaranLain = PengeluaranLain::whereMonth('tanggal', $bulanSekarang)
+        $pengeluaranBulanIni = PengeluaranLain::whereMonth('tanggal', $bulanSekarang)
             ->whereYear('tanggal', $tahunSekarang)
             ->sum('total');
 
-        $pengeluaranBulanLaluPengeluaranLain = PengeluaranLain::whereMonth('tanggal', $bulanLalu)
+        $pengeluaranBulanLalu = PengeluaranLain::whereMonth('tanggal', $bulanLalu)
             ->whereYear('tanggal', $tahunBulanLalu)
             ->sum('total');
-
-        $pengeluaranBulanIni = $pengeluaranBulanIniPengeluaranLain + $pengeluaranBulanIniGajiKaryawan;
-
-        $pengeluaranBulanLalu = $pengeluaranBulanLaluPengeluaranLain + $pengeluaranBulanLaluGajiKaryawan;
 
         if ($pengeluaranBulanLalu > 0) {
             $persentasePengeluaran = (($pengeluaranBulanIni - $pengeluaranBulanLalu) / $pengeluaranBulanLalu) * 100;

@@ -32,7 +32,7 @@
                         <tbody>
                             @forelse($stokBarang as $item)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $stokBarang->firstItem() + $loop->index }}</td>
                                     <td>{{ $item->nama_barang }}</td>
                                     <td>{{ $item->satuan ?? '-' }}</td>
                                     <td>{{ $item->stok }}</td>
@@ -58,6 +58,8 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{ $stokBarang->links() }}
             </div>
         </div>
     </div>

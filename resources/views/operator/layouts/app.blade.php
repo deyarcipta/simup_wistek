@@ -34,38 +34,33 @@
     });
     </script>
 
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Boxicons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" />
+
     <link rel="stylesheet" href="{{ asset('vendor/fonts/iconify-icons.css') }}" />
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-    <!-- Core CSS -->
-    <!-- build:css assets/vendor/css/theme.css  -->
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('vendor/css/core.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/demo.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/modern-admin.css') }}" />
 
     <!-- Vendors CSS -->
-
     <link rel="stylesheet" href="{{ asset('vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
-
-    <!-- endbuild -->
-
     <link rel="stylesheet" href="{{ asset('vendor/libs/apex-charts/apex-charts.css') }}" />
-
-    <!-- Page CSS -->
 
     <!-- Helpers -->
     <script src="{{ asset('vendor/js/helpers.js') }}"></script>
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-
     <script src="{{ asset('js/config.js') }}"></script>
-
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-
 </head>
 <body>
   <!-- Layout Wrapper -->
@@ -142,5 +137,7 @@
     })
 </script>
 @endif
+
+@stack('scripts')
 </body>
 </html>

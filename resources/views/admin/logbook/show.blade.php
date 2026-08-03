@@ -87,7 +87,15 @@
                     <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
                         <h6 class="mb-0 fw-bold text-dark"><i class="bx bx-sun text-warning me-1"></i> Shift 1 (Pagi)</h6>
                         @if($s1)
-                            <span class="badge bg-label-warning text-dark">Petugas: {{ $s1->user->name ?? '-' }}</span>
+                            @php
+                                $s1Lateness = $s1->getLatenessInfo();
+                            @endphp
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-label-warning text-dark">Petugas: {{ $s1->user->name ?? '-' }}</span>
+                                <span class="badge {{ $s1Lateness['badge_class'] }}">
+                                    <i class="bx bx-time me-1"></i> {{ $s1Lateness['status_text'] }}
+                                </span>
+                            </div>
                         @else
                             <span class="badge bg-label-secondary">Belum Diisi</span>
                         @endif
@@ -149,7 +157,15 @@
                     <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
                         <h6 class="mb-0 fw-bold text-dark"><i class="bx bx-cloud-light-rain text-info me-1"></i> Shift 2 (Siang)</h6>
                         @if($s2)
-                            <span class="badge bg-label-info">Petugas: {{ $s2->user->name ?? '-' }}</span>
+                            @php
+                                $s2Lateness = $s2->getLatenessInfo();
+                            @endphp
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-label-info text-dark">Petugas: {{ $s2->user->name ?? '-' }}</span>
+                                <span class="badge {{ $s2Lateness['badge_class'] }}">
+                                    <i class="bx bx-time me-1"></i> {{ $s2Lateness['status_text'] }}
+                                </span>
+                            </div>
                         @else
                             <span class="badge bg-label-secondary">Belum Diisi</span>
                         @endif

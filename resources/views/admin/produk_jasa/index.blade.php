@@ -36,7 +36,7 @@
                         <tbody>
                             @forelse ($produkJasa as $item)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $produkJasa->firstItem() + $loop->index }}</td>
                                     <td>{{ $item->nama }}</td>
                                     <td><span class="badge bg-label-info">{{ ucfirst($item->jenis) }}</span></td>
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
@@ -70,6 +70,8 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{ $produkJasa->links() }}
             </div>
         </div>
     </div>

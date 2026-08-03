@@ -34,7 +34,7 @@
                         <tbody>
                             @forelse ($pengeluaran as $item)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $pengeluaran->firstItem() + $loop->index }}</td>
                                     <td>{{ $item->keterangan }}</td>
                                     <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
                                     <td>{{ $item->tanggal }}</td>
@@ -58,6 +58,8 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{ $pengeluaran->links() }}
             </div>
         </div>
     </div>

@@ -11,7 +11,7 @@ class AdminPiutangController extends Controller
 {
     public function index()
     {
-        $data = Piutang::all();
+        $data = Piutang::latest('tanggal_peminjaman')->paginate(10);
         return view('admin.laporan.piutang.index', compact('data'));
     }
 

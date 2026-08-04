@@ -42,13 +42,7 @@ class AdminLogbookController extends Controller
         
         $jumlahShiftSetting = \App\Models\Pengaturan::first()?->jumlah_shift ?? 2;
         
-        $printId = \App\Models\ProdukJasa::where('nama', 'LIKE', '%PRINT HITAM%')->first()?->id ?? 2;
-        $fotokopiId = \App\Models\ProdukJasa::where('nama', 'LIKE', '%FOTOCOPY%')->first()?->id ?? 9;
-        $jilidId = \App\Models\ProdukJasa::where('nama', 'LIKE', '%JILID%')->first()?->id ?? 12;
-
-        $tarifPrint = \App\Models\ProdukJasa::find($printId)?->harga ?? 500;
-        $tarifFotokopi = \App\Models\ProdukJasa::find($fotokopiId)?->harga ?? 500;
-        $tarifJilid = \App\Models\ProdukJasa::find($jilidId)?->harga ?? 5000;
+        $produkJasaList = \App\Models\ProdukJasa::orderBy('id', 'asc')->get();
 
         $s1 = $logbook->details->where('shift_id', 1)->first();
         $s2 = $logbook->details->where('shift_id', 2)->first();
@@ -64,43 +58,48 @@ class AdminLogbookController extends Controller
         $s3Start = $s2 ? $s2->created_at : null;
         $s3End = $s3 ? $s3->created_at : Carbon::now();
 
-        $getShiftData = function ($start, $end) use ($printId, $fotokopiId, $jilidId, $tarifPrint, $tarifFotokopi, $tarifJilid) {
+        $getShiftData = function ($start, $end) use ($produkJasaList) {
+            if (!$start || !$end) {
+                return [
+                    'transaksi' => collect(),
+                    'summary' => ['total_uang' => 0],
+                    'productSummaries' => [],
+                ];
+            }
+
             $transaksi = \App\Models\Transaksi::with(['details.produkJasa', 'user'])
                 ->whereBetween('created_at', [$start, $end])
                 ->get();
 
-            $summary = [
-                'jumlah_print' => 0,
-                'harga_print' => $tarifPrint,
-                'jumlah_fotokopi' => 0,
-                'harga_fotokopi' => $tarifFotokopi,
-                'jumlah_jilid' => 0,
-                'harga_jilid' => $tarifJilid,
-                'pendapatan_lain' => 0,
-                'total_uang' => 0,
-            ];
+            $productSummaries = [];
+            foreach ($produkJasaList as $product) {
+                $productSummaries[$product->id] = [
+                    'nama' => $product->nama,
+                    'kuantitas' => 0,
+                    'tarif' => $product->harga,
+                    'subtotal' => 0,
+                ];
+            }
 
+            $totalUang = 0;
             foreach ($transaksi as $tx) {
                 foreach ($tx->details as $detail) {
-                    if ($detail->produk_jasa_id == $printId) {
-                        $summary['jumlah_print'] += $detail->jumlah;
-                        $summary['harga_print'] = $detail->harga;
-                    } elseif ($detail->produk_jasa_id == $fotokopiId) {
-                        $summary['jumlah_fotokopi'] += $detail->jumlah;
-                        $summary['harga_fotokopi'] = $detail->harga;
-                    } elseif ($detail->produk_jasa_id == $jilidId) {
-                        $summary['jumlah_jilid'] += $detail->jumlah;
-                        $summary['harga_jilid'] = $detail->harga;
-                    } else {
-                        $summary['pendapatan_lain'] += $detail->subtotal;
+                    $prodId = $detail->produk_jasa_id;
+                    if (isset($productSummaries[$prodId])) {
+                        $productSummaries[$prodId]['kuantitas'] += $detail->jumlah;
+                        $productSummaries[$prodId]['tarif'] = $detail->harga;
+                        $productSummaries[$prodId]['subtotal'] += $detail->subtotal;
                     }
+                    $totalUang += $detail->subtotal;
                 }
-                $summary['total_uang'] += $tx->total;
             }
 
             return [
                 'transaksi' => $transaksi,
-                'summary' => $summary,
+                'summary' => [
+                    'total_uang' => $totalUang,
+                ],
+                'productSummaries' => $productSummaries,
             ];
         };
 

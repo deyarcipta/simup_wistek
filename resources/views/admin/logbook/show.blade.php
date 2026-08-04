@@ -108,57 +108,26 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-hover align-middle">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>No. Transaksi</th>
-                                            <th>Waktu</th>
-                                            <th>Nama Pembeli</th>
-                                            <th>Operator</th>
-                                            <th>Detail Item</th>
-                                            <th class="text-end">Total</th>
+                                        <tr class="text-uppercase">
+                                            <th>Layanan</th>
+                                            <th class="text-center">Kuantitas</th>
+                                            <th class="text-end">Tarif</th>
+                                            <th class="text-end">Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($shift1Real['transaksi']->isEmpty())
+                                        @foreach($shift1Real['productSummaries'] as $summary)
                                             <tr>
-                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                                <td class="fw-semibold">{{ $summary['nama'] }}</td>
+                                                <td class="text-center">{{ $summary['kuantitas'] }}</td>
+                                                <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
+                                                <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
                                             </tr>
-                                        @else
-                                            @foreach($shift1Real['transaksi'] as $tx)
-                                                <tr>
-                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
-                                                    <td>{{ $tx->created_at->format('H:i') }}</td>
-                                                    <td>{{ $tx->nama_pembeli ?: '-' }}</td>
-                                                    <td>{{ $tx->user->name ?? '-' }}</td>
-                                                    <td>
-                                                        <table class="table table-bordered table-sm m-0" style="font-size: 0.82rem; background: transparent;">
-                                                            <thead>
-                                                                <tr class="table-light">
-                                                                    <th>Layanan</th>
-                                                                    <th class="text-center">Kuantitas</th>
-                                                                    <th class="text-end">Tarif</th>
-                                                                    <th class="text-end">Subtotal</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach($tx->details as $d)
-                                                                    <tr>
-                                                                        <td>{{ $d->produkJasa->nama ?? 'Layanan' }}</td>
-                                                                        <td class="text-center">{{ $d->jumlah }}</td>
-                                                                        <td class="text-end">Rp {{ number_format($d->harga, 0, ',', '.') }}</td>
-                                                                        <td class="text-end fw-semibold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
-                                                </tr>
-                                            @endforeach
-                                        @endif
+                                        @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light fw-bold">
-                                            <td colspan="5" class="text-end">Total Pendapatan Shift 1:</td>
+                                            <td colspan="3" class="text-end">Total Pendapatan Shift 1:</td>
                                             <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift1Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>
@@ -195,57 +164,26 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-hover align-middle">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>No. Transaksi</th>
-                                            <th>Waktu</th>
-                                            <th>Nama Pembeli</th>
-                                            <th>Operator</th>
-                                            <th>Detail Item</th>
-                                            <th class="text-end">Total</th>
+                                        <tr class="text-uppercase">
+                                            <th>Layanan</th>
+                                            <th class="text-center">Kuantitas</th>
+                                            <th class="text-end">Tarif</th>
+                                            <th class="text-end">Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($shift2Real['transaksi']->isEmpty())
+                                        @foreach($shift2Real['productSummaries'] as $summary)
                                             <tr>
-                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                                <td class="fw-semibold">{{ $summary['nama'] }}</td>
+                                                <td class="text-center">{{ $summary['kuantitas'] }}</td>
+                                                <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
+                                                <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
                                             </tr>
-                                        @else
-                                            @foreach($shift2Real['transaksi'] as $tx)
-                                                <tr>
-                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
-                                                    <td>{{ $tx->created_at->format('H:i') }}</td>
-                                                    <td>{{ $tx->nama_pembeli ?: '-' }}</td>
-                                                    <td>{{ $tx->user->name ?? '-' }}</td>
-                                                    <td>
-                                                        <table class="table table-bordered table-sm m-0" style="font-size: 0.82rem; background: transparent;">
-                                                            <thead>
-                                                                <tr class="table-light">
-                                                                    <th>Layanan</th>
-                                                                    <th class="text-center">Kuantitas</th>
-                                                                    <th class="text-end">Tarif</th>
-                                                                    <th class="text-end">Subtotal</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach($tx->details as $d)
-                                                                    <tr>
-                                                                        <td>{{ $d->produkJasa->nama ?? 'Layanan' }}</td>
-                                                                        <td class="text-center">{{ $d->jumlah }}</td>
-                                                                        <td class="text-end">Rp {{ number_format($d->harga, 0, ',', '.') }}</td>
-                                                                        <td class="text-end fw-semibold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
-                                                </tr>
-                                            @endforeach
-                                        @endif
+                                        @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light fw-bold">
-                                            <td colspan="5" class="text-end">Total Pendapatan Shift 2:</td>
+                                            <td colspan="3" class="text-end">Total Pendapatan Shift 2:</td>
                                             <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift2Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>
@@ -283,57 +221,26 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-hover align-middle">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>No. Transaksi</th>
-                                            <th>Waktu</th>
-                                            <th>Nama Pembeli</th>
-                                            <th>Operator</th>
-                                            <th>Detail Item</th>
-                                            <th class="text-end">Total</th>
+                                        <tr class="text-uppercase">
+                                            <th>Layanan</th>
+                                            <th class="text-center">Kuantitas</th>
+                                            <th class="text-end">Tarif</th>
+                                            <th class="text-end">Subtotal</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($shift3Real['transaksi']->isEmpty())
+                                        @foreach($shift3Real['productSummaries'] as $summary)
                                             <tr>
-                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                                <td class="fw-semibold">{{ $summary['nama'] }}</td>
+                                                <td class="text-center">{{ $summary['kuantitas'] }}</td>
+                                                <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
+                                                <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
                                             </tr>
-                                        @else
-                                            @foreach($shift3Real['transaksi'] as $tx)
-                                                <tr>
-                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
-                                                    <td>{{ $tx->created_at->format('H:i') }}</td>
-                                                    <td>{{ $tx->nama_pembeli ?: '-' }}</td>
-                                                    <td>{{ $tx->user->name ?? '-' }}</td>
-                                                    <td>
-                                                        <table class="table table-bordered table-sm m-0" style="font-size: 0.82rem; background: transparent;">
-                                                            <thead>
-                                                                <tr class="table-light">
-                                                                    <th>Layanan</th>
-                                                                    <th class="text-center">Kuantitas</th>
-                                                                    <th class="text-end">Tarif</th>
-                                                                    <th class="text-end">Subtotal</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach($tx->details as $d)
-                                                                    <tr>
-                                                                        <td>{{ $d->produkJasa->nama ?? 'Layanan' }}</td>
-                                                                        <td class="text-center">{{ $d->jumlah }}</td>
-                                                                        <td class="text-end">Rp {{ number_format($d->harga, 0, ',', '.') }}</td>
-                                                                        <td class="text-end fw-semibold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
-                                                </tr>
-                                            @endforeach
-                                        @endif
+                                        @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light fw-bold">
-                                            <td colspan="5" class="text-end">Total Pendapatan Shift 3:</td>
+                                            <td colspan="3" class="text-end">Total Pendapatan Shift 3:</td>
                                             <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift3Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>

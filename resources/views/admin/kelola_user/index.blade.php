@@ -21,30 +21,6 @@
         </div>
     </div>
     <div class="card-body">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show shadow-lg position-fixed end-0 top-0 m-3 z-3" role="alert" style="max-width: 350px;">
-                <div class="d-flex align-items-center">
-                    <i class="bx bx-check-circle me-2" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <strong>Sukses!</strong> {{ session('success') }}
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show shadow-lg position-fixed end-0 top-0 m-3 z-3" role="alert" style="max-width: 350px;">
-                <div class="d-flex align-items-center">
-                    <i class="bx bx-error-circle me-2" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <strong>Error!</strong> {{ session('error') }}
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
 
         <div class="table-responsive">
             <table class="table table-bordered align-middle">

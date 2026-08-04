@@ -128,7 +128,7 @@ class AdminKelolaUserController extends Controller
             }
             
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-            $tempFile = tempnam(sys_get_temp_dir(), 'excel');
+            $tempFile = storage_path('app/temp_sample_' . uniqid() . '.xlsx');
             $writer->save($tempFile);
             
             return response()->download($tempFile, 'contoh_template_user.xlsx')->deleteFileAfterSend(true);
@@ -236,7 +236,7 @@ class AdminKelolaUserController extends Controller
             }
             
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-            $tempFile = tempnam(sys_get_temp_dir(), 'excel');
+            $tempFile = storage_path('app/temp_export_' . uniqid() . '.xlsx');
             $writer->save($tempFile);
             
             return response()->download($tempFile, 'daftar_user_' . date('Ymd_His') . '.xlsx')->deleteFileAfterSend(true);

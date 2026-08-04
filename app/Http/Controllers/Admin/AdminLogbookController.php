@@ -39,7 +39,84 @@ class AdminLogbookController extends Controller
     public function show($id)
     {
         $logbook = Logbook::with(['details.shift', 'details.user'])->findOrFail($id);
-        return view('admin.logbook.show', compact('logbook'));
+        
+        $jumlahShiftSetting = \App\Models\Pengaturan::first()?->jumlah_shift ?? 2;
+        
+        $printId = \App\Models\ProdukJasa::where('nama', 'LIKE', '%PRINT HITAM%')->first()?->id ?? 2;
+        $fotokopiId = \App\Models\ProdukJasa::where('nama', 'LIKE', '%FOTOCOPY%')->first()?->id ?? 9;
+        $jilidId = \App\Models\ProdukJasa::where('nama', 'LIKE', '%JILID%')->first()?->id ?? 12;
+
+        $tarifPrint = \App\Models\ProdukJasa::find($printId)?->harga ?? 500;
+        $tarifFotokopi = \App\Models\ProdukJasa::find($fotokopiId)?->harga ?? 500;
+        $tarifJilid = \App\Models\ProdukJasa::find($jilidId)?->harga ?? 5000;
+
+        $s1 = $logbook->details->where('shift_id', 1)->first();
+        $s2 = $logbook->details->where('shift_id', 2)->first();
+        $s3 = $logbook->details->where('shift_id', 3)->first();
+
+        // Time ranges
+        $s1Start = $logbook->created_at;
+        $s1End = $s1 ? $s1->created_at : Carbon::now();
+
+        $s2Start = $s1 ? $s1->created_at : null;
+        $s2End = $s2 ? $s2->created_at : Carbon::now();
+
+        $s3Start = $s2 ? $s2->created_at : null;
+        $s3End = $s3 ? $s3->created_at : Carbon::now();
+
+        $getShiftData = function ($start, $end) use ($printId, $fotokopiId, $jilidId, $tarifPrint, $tarifFotokopi, $tarifJilid) {
+            $transaksi = \App\Models\Transaksi::with(['details.produkJasa', 'user'])
+                ->whereBetween('created_at', [$start, $end])
+                ->get();
+
+            $summary = [
+                'jumlah_print' => 0,
+                'harga_print' => $tarifPrint,
+                'jumlah_fotokopi' => 0,
+                'harga_fotokopi' => $tarifFotokopi,
+                'jumlah_jilid' => 0,
+                'harga_jilid' => $tarifJilid,
+                'pendapatan_lain' => 0,
+                'total_uang' => 0,
+            ];
+
+            foreach ($transaksi as $tx) {
+                foreach ($tx->details as $detail) {
+                    if ($detail->produk_jasa_id == $printId) {
+                        $summary['jumlah_print'] += $detail->jumlah;
+                        $summary['harga_print'] = $detail->harga;
+                    } elseif ($detail->produk_jasa_id == $fotokopiId) {
+                        $summary['jumlah_fotokopi'] += $detail->jumlah;
+                        $summary['harga_fotokopi'] = $detail->harga;
+                    } elseif ($detail->produk_jasa_id == $jilidId) {
+                        $summary['jumlah_jilid'] += $detail->jumlah;
+                        $summary['harga_jilid'] = $detail->harga;
+                    } else {
+                        $summary['pendapatan_lain'] += $detail->subtotal;
+                    }
+                }
+                $summary['total_uang'] += $tx->total;
+            }
+
+            return [
+                'transaksi' => $transaksi,
+                'summary' => $summary,
+            ];
+        };
+
+        $shift1Real = $getShiftData($s1Start, $s1End);
+
+        $shift2Real = null;
+        if ($s1) {
+            $shift2Real = $getShiftData($s2Start, $s2End);
+        }
+
+        $shift3Real = null;
+        if ($s2) {
+            $shift3Real = $getShiftData($s3Start, $s3End);
+        }
+
+        return view('admin.logbook.show', compact('logbook', 'shift1Real', 'shift2Real', 'shift3Real', 'jumlahShiftSetting'));
     }
 
     public function exportPdf(Request $request)

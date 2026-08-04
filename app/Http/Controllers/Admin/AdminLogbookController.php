@@ -116,7 +116,9 @@ class AdminLogbookController extends Controller
             $shift3Real = $getShiftData($s3Start, $s3End);
         }
 
-        return view('admin.logbook.show', compact('logbook', 'shift1Real', 'shift2Real', 'shift3Real', 'jumlahShiftSetting'));
+        $produkJasaList = \App\Models\ProdukJasa::orderBy('id', 'asc')->get();
+
+        return view('admin.logbook.show', compact('logbook', 'shift1Real', 'shift2Real', 'shift3Real', 'jumlahShiftSetting', 'produkJasaList'));
     }
 
     public function exportPdf(Request $request)

@@ -8,23 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('pengeluaran_lain', function (Blueprint $table) {
-            // tambahkan kolom member_id
-            $table->unsignedBigInteger('member_id')->nullable()->after('id');
-
-            // tambahkan relasi ke users
-            $table->foreign('member_id')
-                ->references('id')
-                ->on('users')
-                ->nullOnDelete();
+        Schema::create('pencairan_saldo', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('member_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // admin/operator pencair
+            $table->decimal('jumlah', 15, 2);
+            $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::table('pengeluaran_lain', function (Blueprint $table) {
-            $table->dropForeign(['member_id']);
-            $table->dropColumn('member_id');
-        });
+        Schema::dropIfExists('pencairan_saldo');
     }
 };

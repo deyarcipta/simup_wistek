@@ -116,14 +116,23 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @php $hasItems1 = false; @endphp
                                         @foreach($shift1Real['productSummaries'] as $summary)
-                                            <tr>
-                                                <td class="fw-semibold">{{ $summary['nama'] }}</td>
-                                                <td class="text-center">{{ $summary['kuantitas'] }}</td>
-                                                <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
-                                                <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
-                                            </tr>
+                                            @if($summary['kuantitas'] > 0)
+                                                @php $hasItems1 = true; @endphp
+                                                <tr>
+                                                    <td class="fw-semibold">{{ $summary['nama'] }}</td>
+                                                    <td class="text-center">{{ $summary['kuantitas'] }}</td>
+                                                    <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
+                                                </tr>
+                                            @endif
                                         @endforeach
+                                        @if(!$hasItems1)
+                                            <tr>
+                                                <td colspan="4" class="text-muted text-center py-3">Tidak ada transaksi pada shift ini.</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light fw-bold">
@@ -172,14 +181,23 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @php $hasItems2 = false; @endphp
                                         @foreach($shift2Real['productSummaries'] as $summary)
-                                            <tr>
-                                                <td class="fw-semibold">{{ $summary['nama'] }}</td>
-                                                <td class="text-center">{{ $summary['kuantitas'] }}</td>
-                                                <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
-                                                <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
-                                            </tr>
+                                            @if($summary['kuantitas'] > 0)
+                                                @php $hasItems2 = true; @endphp
+                                                <tr>
+                                                    <td class="fw-semibold">{{ $summary['nama'] }}</td>
+                                                    <td class="text-center">{{ $summary['kuantitas'] }}</td>
+                                                    <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
+                                                </tr>
+                                            @endif
                                         @endforeach
+                                        @if(!$hasItems2)
+                                            <tr>
+                                                <td colspan="4" class="text-muted text-center py-3">Tidak ada transaksi pada shift ini.</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light fw-bold">
@@ -229,14 +247,23 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @php $hasItems3 = false; @endphp
                                         @foreach($shift3Real['productSummaries'] as $summary)
-                                            <tr>
-                                                <td class="fw-semibold">{{ $summary['nama'] }}</td>
-                                                <td class="text-center">{{ $summary['kuantitas'] }}</td>
-                                                <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
-                                                <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
-                                            </tr>
+                                            @if($summary['kuantitas'] > 0)
+                                                @php $hasItems3 = true; @endphp
+                                                <tr>
+                                                    <td class="fw-semibold">{{ $summary['nama'] }}</td>
+                                                    <td class="text-center">{{ $summary['kuantitas'] }}</td>
+                                                    <td class="text-end">Rp {{ number_format($summary['tarif'], 0, ',', '.') }}</td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
+                                                </tr>
+                                            @endif
                                         @endforeach
+                                        @if(!$hasItems3)
+                                            <tr>
+                                                <td colspan="4" class="text-muted text-center py-3">Tidak ada transaksi pada shift ini.</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light fw-bold">

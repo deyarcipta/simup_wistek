@@ -107,70 +107,58 @@
                         @if($s1)
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-hover align-middle">
-                                    <thead class="table-light text-nowrap">
+                                    <thead class="table-light">
                                         <tr>
                                             <th>No. Transaksi</th>
                                             <th>Waktu</th>
                                             <th>Nama Pembeli</th>
                                             <th>Operator</th>
-                                            @foreach($produkJasaList as $product)
-                                                <th class="text-center">{{ $product->nama }}</th>
-                                            @endforeach
+                                            <th>Detail Item</th>
                                             <th class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @if($shift1Real['transaksi']->isEmpty())
                                             <tr>
-                                                <td colspan="{{ 5 + count($produkJasaList) }}" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
                                             </tr>
                                         @else
                                             @foreach($shift1Real['transaksi'] as $tx)
                                                 <tr>
-                                                    <td class="fw-semibold text-primary text-nowrap">{{ $tx->kode_transaksi }}</td>
+                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
                                                     <td>{{ $tx->created_at->format('H:i') }}</td>
                                                     <td>{{ $tx->nama_pembeli ?: '-' }}</td>
                                                     <td>{{ $tx->user->name ?? '-' }}</td>
-                                                    @foreach($produkJasaList as $product)
-                                                        @php
-                                                            $detail = $tx->details->where('produk_jasa_id', $product->id)->first();
-                                                        @endphp
-                                                        <td class="text-center text-nowrap">
-                                                            @if($detail)
-                                                                {{ $detail->jumlah }}x <small class="text-muted">(@ Rp{{ number_format($detail->harga, 0, ',', '.') }})</small>
-                                                            @else
-                                                                -
-                                                            @endif
-                                                        </td>
-                                                    @endforeach
-                                                    <td class="text-end fw-semibold text-nowrap">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
+                                                    <td>
+                                                        <table class="table table-bordered table-sm m-0" style="font-size: 0.82rem; background: transparent;">
+                                                            <thead>
+                                                                <tr class="table-light">
+                                                                    <th>Layanan</th>
+                                                                    <th class="text-center">Kuantitas</th>
+                                                                    <th class="text-end">Tarif</th>
+                                                                    <th class="text-end">Subtotal</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($tx->details as $d)
+                                                                    <tr>
+                                                                        <td>{{ $d->produkJasa->nama ?? 'Layanan' }}</td>
+                                                                        <td class="text-center">{{ $d->jumlah }}</td>
+                                                                        <td class="text-end">Rp {{ number_format($d->harga, 0, ',', '.') }}</td>
+                                                                        <td class="text-end fw-semibold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
                                                 </tr>
                                             @endforeach
                                         @endif
                                     </tbody>
                                     <tfoot>
-                                        <tr class="table-light fw-bold text-nowrap">
-                                            <td colspan="4" class="text-end">Total Pendapatan Shift 1:</td>
-                                            @foreach($produkJasaList as $product)
-                                                @php
-                                                    $totalQty = 0;
-                                                    $totalSum = 0;
-                                                    foreach($shift1Real['transaksi'] as $tx) {
-                                                        $detail = $tx->details->where('produk_jasa_id', $product->id)->first();
-                                                        if ($detail) {
-                                                            $totalQty += $detail->jumlah;
-                                                            $totalSum += $detail->subtotal;
-                                                        }
-                                                    }
-                                                @endphp
-                                                <td class="text-center">
-                                                    @if($totalQty > 0)
-                                                        {{ $totalQty }}x <small class="text-muted">(Rp{{ number_format($totalSum, 0, ',', '.') }})</small>
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
-                                            @endforeach
+                                        <tr class="table-light fw-bold">
+                                            <td colspan="5" class="text-end">Total Pendapatan Shift 1:</td>
                                             <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift1Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>
@@ -206,70 +194,58 @@
                         @if($s2)
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-hover align-middle">
-                                    <thead class="table-light text-nowrap">
+                                    <thead class="table-light">
                                         <tr>
                                             <th>No. Transaksi</th>
                                             <th>Waktu</th>
                                             <th>Nama Pembeli</th>
                                             <th>Operator</th>
-                                            @foreach($produkJasaList as $product)
-                                                <th class="text-center">{{ $product->nama }}</th>
-                                            @endforeach
+                                            <th>Detail Item</th>
                                             <th class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @if($shift2Real['transaksi']->isEmpty())
                                             <tr>
-                                                <td colspan="{{ 5 + count($produkJasaList) }}" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
                                             </tr>
                                         @else
                                             @foreach($shift2Real['transaksi'] as $tx)
                                                 <tr>
-                                                    <td class="fw-semibold text-primary text-nowrap">{{ $tx->kode_transaksi }}</td>
+                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
                                                     <td>{{ $tx->created_at->format('H:i') }}</td>
                                                     <td>{{ $tx->nama_pembeli ?: '-' }}</td>
                                                     <td>{{ $tx->user->name ?? '-' }}</td>
-                                                    @foreach($produkJasaList as $product)
-                                                        @php
-                                                            $detail = $tx->details->where('produk_jasa_id', $product->id)->first();
-                                                        @endphp
-                                                        <td class="text-center text-nowrap">
-                                                            @if($detail)
-                                                                {{ $detail->jumlah }}x <small class="text-muted">(@ Rp{{ number_format($detail->harga, 0, ',', '.') }})</small>
-                                                            @else
-                                                                -
-                                                            @endif
-                                                        </td>
-                                                    @endforeach
-                                                    <td class="text-end fw-semibold text-nowrap">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
+                                                    <td>
+                                                        <table class="table table-bordered table-sm m-0" style="font-size: 0.82rem; background: transparent;">
+                                                            <thead>
+                                                                <tr class="table-light">
+                                                                    <th>Layanan</th>
+                                                                    <th class="text-center">Kuantitas</th>
+                                                                    <th class="text-end">Tarif</th>
+                                                                    <th class="text-end">Subtotal</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($tx->details as $d)
+                                                                    <tr>
+                                                                        <td>{{ $d->produkJasa->nama ?? 'Layanan' }}</td>
+                                                                        <td class="text-center">{{ $d->jumlah }}</td>
+                                                                        <td class="text-end">Rp {{ number_format($d->harga, 0, ',', '.') }}</td>
+                                                                        <td class="text-end fw-semibold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
                                                 </tr>
                                             @endforeach
                                         @endif
                                     </tbody>
                                     <tfoot>
-                                        <tr class="table-light fw-bold text-nowrap">
-                                            <td colspan="4" class="text-end">Total Pendapatan Shift 2:</td>
-                                            @foreach($produkJasaList as $product)
-                                                @php
-                                                    $totalQty = 0;
-                                                    $totalSum = 0;
-                                                    foreach($shift2Real['transaksi'] as $tx) {
-                                                        $detail = $tx->details->where('produk_jasa_id', $product->id)->first();
-                                                        if ($detail) {
-                                                            $totalQty += $detail->jumlah;
-                                                            $totalSum += $detail->subtotal;
-                                                        }
-                                                    }
-                                                @endphp
-                                                <td class="text-center">
-                                                    @if($totalQty > 0)
-                                                        {{ $totalQty }}x <small class="text-muted">(Rp{{ number_format($totalSum, 0, ',', '.') }})</small>
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
-                                            @endforeach
+                                        <tr class="table-light fw-bold">
+                                            <td colspan="5" class="text-end">Total Pendapatan Shift 2:</td>
                                             <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift2Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>
@@ -306,70 +282,58 @@
                         @if($s3)
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-hover align-middle">
-                                    <thead class="table-light text-nowrap">
+                                    <thead class="table-light">
                                         <tr>
                                             <th>No. Transaksi</th>
                                             <th>Waktu</th>
                                             <th>Nama Pembeli</th>
                                             <th>Operator</th>
-                                            @foreach($produkJasaList as $product)
-                                                <th class="text-center">{{ $product->nama }}</th>
-                                            @endforeach
+                                            <th>Detail Item</th>
                                             <th class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @if($shift3Real['transaksi']->isEmpty())
                                             <tr>
-                                                <td colspan="{{ 5 + count($produkJasaList) }}" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
                                             </tr>
                                         @else
                                             @foreach($shift3Real['transaksi'] as $tx)
                                                 <tr>
-                                                    <td class="fw-semibold text-primary text-nowrap">{{ $tx->kode_transaksi }}</td>
+                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
                                                     <td>{{ $tx->created_at->format('H:i') }}</td>
                                                     <td>{{ $tx->nama_pembeli ?: '-' }}</td>
                                                     <td>{{ $tx->user->name ?? '-' }}</td>
-                                                    @foreach($produkJasaList as $product)
-                                                        @php
-                                                            $detail = $tx->details->where('produk_jasa_id', $product->id)->first();
-                                                        @endphp
-                                                        <td class="text-center text-nowrap">
-                                                            @if($detail)
-                                                                {{ $detail->jumlah }}x <small class="text-muted">(@ Rp{{ number_format($detail->harga, 0, ',', '.') }})</small>
-                                                            @else
-                                                                -
-                                                            @endif
-                                                        </td>
-                                                    @endforeach
-                                                    <td class="text-end fw-semibold text-nowrap">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
+                                                    <td>
+                                                        <table class="table table-bordered table-sm m-0" style="font-size: 0.82rem; background: transparent;">
+                                                            <thead>
+                                                                <tr class="table-light">
+                                                                    <th>Layanan</th>
+                                                                    <th class="text-center">Kuantitas</th>
+                                                                    <th class="text-end">Tarif</th>
+                                                                    <th class="text-end">Subtotal</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($tx->details as $d)
+                                                                    <tr>
+                                                                        <td>{{ $d->produkJasa->nama ?? 'Layanan' }}</td>
+                                                                        <td class="text-center">{{ $d->jumlah }}</td>
+                                                                        <td class="text-end">Rp {{ number_format($d->harga, 0, ',', '.') }}</td>
+                                                                        <td class="text-end fw-semibold">Rp {{ number_format($d->subtotal, 0, ',', '.') }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
                                                 </tr>
                                             @endforeach
                                         @endif
                                     </tbody>
                                     <tfoot>
-                                        <tr class="table-light fw-bold text-nowrap">
-                                            <td colspan="4" class="text-end">Total Pendapatan Shift 3:</td>
-                                            @foreach($produkJasaList as $product)
-                                                @php
-                                                    $totalQty = 0;
-                                                    $totalSum = 0;
-                                                    foreach($shift3Real['transaksi'] as $tx) {
-                                                        $detail = $tx->details->where('produk_jasa_id', $product->id)->first();
-                                                        if ($detail) {
-                                                            $totalQty += $detail->jumlah;
-                                                            $totalSum += $detail->subtotal;
-                                                        }
-                                                    }
-                                                @endphp
-                                                <td class="text-center">
-                                                    @if($totalQty > 0)
-                                                        {{ $totalQty }}x <small class="text-muted">(Rp{{ number_format($totalSum, 0, ',', '.') }})</small>
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
-                                            @endforeach
+                                        <tr class="table-light fw-bold">
+                                            <td colspan="5" class="text-end">Total Pendapatan Shift 3:</td>
                                             <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift3Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>

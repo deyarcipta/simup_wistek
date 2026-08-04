@@ -106,88 +106,49 @@
                     <div class="card-body py-3">
                         @if($s1)
                             <div class="table-responsive">
-                                <table class="table table-bordered table-sm align-middle">
+                                <table class="table table-bordered table-striped table-hover align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Layanan</th>
-                                            <th class="text-center">Kuantitas</th>
-                                            <th class="text-end">Tarif Riwayat</th>
-                                            <th class="text-end">Subtotal</th>
+                                            <th>No. Transaksi</th>
+                                            <th>Waktu</th>
+                                            <th>Nama Pembeli</th>
+                                            <th>Operator</th>
+                                            <th>Detail Item</th>
+                                            <th class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>Print Hitam Putih</td>
-                                            <td class="text-center fw-bold">{{ $shift1Real['summary']['jumlah_print'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift1Real['summary']['harga_print'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift1Real['summary']['jumlah_print'] * $shift1Real['summary']['harga_print'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Fotokopi Hitam</td>
-                                            <td class="text-center fw-bold">{{ $shift1Real['summary']['jumlah_fotokopi'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift1Real['summary']['harga_fotokopi'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift1Real['summary']['jumlah_fotokopi'] * $shift1Real['summary']['harga_fotokopi'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jilid Makalah</td>
-                                            <td class="text-center fw-bold">{{ $shift1Real['summary']['jumlah_jilid'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift1Real['summary']['harga_jilid'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift1Real['summary']['jumlah_jilid'] * $shift1Real['summary']['harga_jilid'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3">Pendapatan Lain-lain (Retail/Pulpen/dll)</td>
-                                            <td class="text-end fw-bold text-success">Rp {{ number_format($shift1Real['summary']['pendapatan_lain'] ?? 0, 0, ',', '.') }}</td>
-                                        </tr>
+                                        @if($shift1Real['transaksi']->isEmpty())
+                                            <tr>
+                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                            </tr>
+                                        @else
+                                            @foreach($shift1Real['transaksi'] as $tx)
+                                                <tr>
+                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
+                                                    <td>{{ $tx->created_at->format('H:i') }}</td>
+                                                    <td>{{ $tx->nama_pembeli ?: '-' }}</td>
+                                                    <td>{{ $tx->user->name ?? '-' }}</td>
+                                                    <td>
+                                                        @foreach($tx->details as $d)
+                                                            <div class="small">
+                                                                {{ $d->produkJasa->nama ?? 'Layanan' }} 
+                                                                <span class="text-muted">({{ $d->jumlah }}x @ Rp {{ number_format($d->harga, 0, ',', '.') }})</span>
+                                                            </div>
+                                                        @endforeach
+                                                    </td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
                                     </tbody>
                                     <tfoot>
-                                        <tr class="table-light">
-                                            <th colspan="3" class="text-end">Total Pendapatan Shift 1:</th>
-                                            <th class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift1Real['summary']['total_uang'], 0, ',', '.') }}</th>
+                                        <tr class="table-light fw-bold">
+                                            <td colspan="5" class="text-end">Total Pendapatan Shift 1:</td>
+                                            <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift1Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>
                                 </table>
-                            </div>
-
-                            {{-- Rincian Transaksi Real (POS) --}}
-                            <div class="mt-4 pt-3 border-top">
-                                <h6 class="fw-bold mb-2 text-dark"><i class="bx bx-list-ul text-primary me-1"></i> Rincian Transaksi Real (POS)</h6>
-                                @if($shift1Real['transaksi']->isEmpty())
-                                    <p class="text-muted small mb-0">Tidak ada transaksi POS pada shift ini.</p>
-                                @else
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover table-sm align-middle" style="font-size: 0.85rem;">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>No. Transaksi</th>
-                                                    <th>Waktu</th>
-                                                    <th>Nama Pembeli</th>
-                                                    <th>Operator</th>
-                                                    <th>Detail Item</th>
-                                                    <th class="text-end">Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($shift1Real['transaksi'] as $tx)
-                                                    <tr>
-                                                        <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
-                                                        <td>{{ $tx->created_at->format('H:i') }}</td>
-                                                        <td>{{ $tx->nama_pembeli ?: '-' }}</td>
-                                                        <td>{{ $tx->user->name ?? '-' }}</td>
-                                                        <td>
-                                                            @foreach($tx->details as $d)
-                                                                <div class="small">
-                                                                    {{ $d->produkJasa->nama ?? 'Layanan' }} 
-                                                                    <span class="text-muted">({{ $d->jumlah }}x @ Rp {{ number_format($d->harga, 0, ',', '.') }})</span>
-                                                                </div>
-                                                            @endforeach
-                                                        </td>
-                                                        <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @endif
                             </div>
                         @else
                             <p class="text-muted text-center my-3">Data untuk Shift 1 Pagi belum dimasukkan.</p>
@@ -218,88 +179,49 @@
                     <div class="card-body py-3">
                         @if($s2)
                             <div class="table-responsive">
-                                <table class="table table-bordered table-sm align-middle">
+                                <table class="table table-bordered table-striped table-hover align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Layanan</th>
-                                            <th class="text-center">Kuantitas</th>
-                                            <th class="text-end">Tarif Riwayat</th>
-                                            <th class="text-end">Subtotal</th>
+                                            <th>No. Transaksi</th>
+                                            <th>Waktu</th>
+                                            <th>Nama Pembeli</th>
+                                            <th>Operator</th>
+                                            <th>Detail Item</th>
+                                            <th class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>Print Hitam Putih</td>
-                                            <td class="text-center fw-bold">{{ $shift2Real['summary']['jumlah_print'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift2Real['summary']['harga_print'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift2Real['summary']['jumlah_print'] * $shift2Real['summary']['harga_print'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Fotokopi Hitam</td>
-                                            <td class="text-center fw-bold">{{ $shift2Real['summary']['jumlah_fotokopi'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift2Real['summary']['harga_fotokopi'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift2Real['summary']['jumlah_fotokopi'] * $shift2Real['summary']['harga_fotokopi'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jilid Makalah</td>
-                                            <td class="text-center fw-bold">{{ $shift2Real['summary']['jumlah_jilid'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift2Real['summary']['harga_jilid'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift2Real['summary']['jumlah_jilid'] * $shift2Real['summary']['harga_jilid'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3">Pendapatan Lain-lain (Retail/Pulpen/dll)</td>
-                                            <td class="text-end fw-bold text-success">Rp {{ number_format($shift2Real['summary']['pendapatan_lain'] ?? 0, 0, ',', '.') }}</td>
-                                        </tr>
+                                        @if($shift2Real['transaksi']->isEmpty())
+                                            <tr>
+                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                            </tr>
+                                        @else
+                                            @foreach($shift2Real['transaksi'] as $tx)
+                                                <tr>
+                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
+                                                    <td>{{ $tx->created_at->format('H:i') }}</td>
+                                                    <td>{{ $tx->nama_pembeli ?: '-' }}</td>
+                                                    <td>{{ $tx->user->name ?? '-' }}</td>
+                                                    <td>
+                                                        @foreach($tx->details as $d)
+                                                            <div class="small">
+                                                                {{ $d->produkJasa->nama ?? 'Layanan' }} 
+                                                                <span class="text-muted">({{ $d->jumlah }}x @ Rp {{ number_format($d->harga, 0, ',', '.') }})</span>
+                                                            </div>
+                                                        @endforeach
+                                                    </td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
                                     </tbody>
                                     <tfoot>
-                                        <tr class="table-light">
-                                            <th colspan="3" class="text-end">Total Pendapatan Shift 2:</th>
-                                            <th class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift2Real['summary']['total_uang'], 0, ',', '.') }}</th>
+                                        <tr class="table-light fw-bold">
+                                            <td colspan="5" class="text-end">Total Pendapatan Shift 2:</td>
+                                            <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift2Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>
                                 </table>
-                            </div>
-
-                            {{-- Rincian Transaksi Real (POS) --}}
-                            <div class="mt-4 pt-3 border-top">
-                                <h6 class="fw-bold mb-2 text-dark"><i class="bx bx-list-ul text-primary me-1"></i> Rincian Transaksi Real (POS)</h6>
-                                @if($shift2Real['transaksi']->isEmpty())
-                                    <p class="text-muted small mb-0">Tidak ada transaksi POS pada shift ini.</p>
-                                @else
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover table-sm align-middle" style="font-size: 0.85rem;">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>No. Transaksi</th>
-                                                    <th>Waktu</th>
-                                                    <th>Nama Pembeli</th>
-                                                    <th>Operator</th>
-                                                    <th>Detail Item</th>
-                                                    <th class="text-end">Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($shift2Real['transaksi'] as $tx)
-                                                    <tr>
-                                                        <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
-                                                        <td>{{ $tx->created_at->format('H:i') }}</td>
-                                                        <td>{{ $tx->nama_pembeli ?: '-' }}</td>
-                                                        <td>{{ $tx->user->name ?? '-' }}</td>
-                                                        <td>
-                                                            @foreach($tx->details as $d)
-                                                                <div class="small">
-                                                                    {{ $d->produkJasa->nama ?? 'Layanan' }} 
-                                                                    <span class="text-muted">({{ $d->jumlah }}x @ Rp {{ number_format($d->harga, 0, ',', '.') }})</span>
-                                                                </div>
-                                                            @endforeach
-                                                        </td>
-                                                        <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @endif
                             </div>
                         @else
                             <p class="text-muted text-center my-3">Data untuk Shift 2 Siang belum dimasukkan.</p>
@@ -331,88 +253,49 @@
                     <div class="card-body py-3">
                         @if($s3)
                             <div class="table-responsive">
-                                <table class="table table-bordered table-sm align-middle">
+                                <table class="table table-bordered table-striped table-hover align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Layanan</th>
-                                            <th class="text-center">Kuantitas</th>
-                                            <th class="text-end">Tarif Riwayat</th>
-                                            <th class="text-end">Subtotal</th>
+                                            <th>No. Transaksi</th>
+                                            <th>Waktu</th>
+                                            <th>Nama Pembeli</th>
+                                            <th>Operator</th>
+                                            <th>Detail Item</th>
+                                            <th class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>Print Hitam Putih</td>
-                                            <td class="text-center fw-bold">{{ $shift3Real['summary']['jumlah_print'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift3Real['summary']['harga_print'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift3Real['summary']['jumlah_print'] * $shift3Real['summary']['harga_print'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Fotokopi Hitam</td>
-                                            <td class="text-center fw-bold">{{ $shift3Real['summary']['jumlah_fotokopi'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift3Real['summary']['harga_fotokopi'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift3Real['summary']['jumlah_fotokopi'] * $shift3Real['summary']['harga_fotokopi'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Jilid Makalah</td>
-                                            <td class="text-center fw-bold">{{ $shift3Real['summary']['jumlah_jilid'] }}</td>
-                                            <td class="text-end">Rp {{ number_format($shift3Real['summary']['harga_jilid'], 0, ',', '.') }}</td>
-                                            <td class="text-end fw-bold">Rp {{ number_format($shift3Real['summary']['jumlah_jilid'] * $shift3Real['summary']['harga_jilid'], 0, ',', '.') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3">Pendapatan Lain-lain (Retail/Pulpen/dll)</td>
-                                            <td class="text-end fw-bold text-success">Rp {{ number_format($shift3Real['summary']['pendapatan_lain'] ?? 0, 0, ',', '.') }}</td>
-                                        </tr>
+                                        @if($shift3Real['transaksi']->isEmpty())
+                                            <tr>
+                                                <td colspan="6" class="text-muted text-center py-3">Tidak ada transaksi POS pada shift ini.</td>
+                                            </tr>
+                                        @else
+                                            @foreach($shift3Real['transaksi'] as $tx)
+                                                <tr>
+                                                    <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
+                                                    <td>{{ $tx->created_at->format('H:i') }}</td>
+                                                    <td>{{ $tx->nama_pembeli ?: '-' }}</td>
+                                                    <td>{{ $tx->user->name ?? '-' }}</td>
+                                                    <td>
+                                                        @foreach($tx->details as $d)
+                                                            <div class="small">
+                                                                {{ $d->produkJasa->nama ?? 'Layanan' }} 
+                                                                <span class="text-muted">({{ $d->jumlah }}x @ Rp {{ number_format($d->harga, 0, ',', '.') }})</span>
+                                                            </div>
+                                                        @endforeach
+                                                    </td>
+                                                    <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
                                     </tbody>
                                     <tfoot>
-                                        <tr class="table-light">
-                                            <th colspan="3" class="text-end">Total Pendapatan Shift 3:</th>
-                                            <th class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift3Real['summary']['total_uang'], 0, ',', '.') }}</th>
+                                        <tr class="table-light fw-bold">
+                                            <td colspan="5" class="text-end">Total Pendapatan Shift 3:</td>
+                                            <td class="text-end text-primary h6 fw-bold">Rp {{ number_format($shift3Real['summary']['total_uang'], 0, ',', '.') }}</td>
                                         </tr>
                                     </tfoot>
                                 </table>
-                            </div>
-
-                            {{-- Rincian Transaksi Real (POS) --}}
-                            <div class="mt-4 pt-3 border-top">
-                                <h6 class="fw-bold mb-2 text-dark"><i class="bx bx-list-ul text-primary me-1"></i> Rincian Transaksi Real (POS)</h6>
-                                @if($shift3Real['transaksi']->isEmpty())
-                                    <p class="text-muted small mb-0">Tidak ada transaksi POS pada shift ini.</p>
-                                @else
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover table-sm align-middle" style="font-size: 0.85rem;">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>No. Transaksi</th>
-                                                    <th>Waktu</th>
-                                                    <th>Nama Pembeli</th>
-                                                    <th>Operator</th>
-                                                    <th>Detail Item</th>
-                                                    <th class="text-end">Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($shift3Real['transaksi'] as $tx)
-                                                    <tr>
-                                                        <td class="fw-semibold text-primary">{{ $tx->kode_transaksi }}</td>
-                                                        <td>{{ $tx->created_at->format('H:i') }}</td>
-                                                        <td>{{ $tx->nama_pembeli ?: '-' }}</td>
-                                                        <td>{{ $tx->user->name ?? '-' }}</td>
-                                                        <td>
-                                                            @foreach($tx->details as $d)
-                                                                <div class="small">
-                                                                    {{ $d->produkJasa->nama ?? 'Layanan' }} 
-                                                                    <span class="text-muted">({{ $d->jumlah }}x @ Rp {{ number_format($d->harga, 0, ',', '.') }})</span>
-                                                                </div>
-                                                            @endforeach
-                                                        </td>
-                                                        <td class="text-end fw-semibold">Rp {{ number_format($tx->total, 0, ',', '.') }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @endif
                             </div>
                         @else
                             <p class="text-muted text-center my-3">Data untuk Shift 3 Sore belum dimasukkan.</p>

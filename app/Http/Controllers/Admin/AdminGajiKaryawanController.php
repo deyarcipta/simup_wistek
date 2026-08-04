@@ -8,10 +8,16 @@ use Illuminate\Http\Request;
 
 class AdminGajiKaryawanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $gaji = GajiKaryawan::latest()->get();
-        return view('admin.pengeluaran.gaji.index', compact('gaji'));
+        $search = $request->get('search');
+        $gaji = GajiKaryawan::when($search, function ($query, $search) {
+                                return $query->where('nama_karyawan', 'like', "%{$search}%")
+                                             ->orWhere('total_gaji', 'like', "%{$search}%");
+                            })
+                            ->latest()
+                            ->get();
+        return view('admin.pengeluaran.gaji.index', compact('gaji', 'search'));
     }
 
     public function store(Request $request)

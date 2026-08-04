@@ -9,12 +9,21 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminKelolaUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->get('search');
         $users = User::whereIn('role', ['admin', 'operator'])
+                        ->when($search, function ($query, $search) {
+                            return $query->where(function ($q) use ($search) {
+                                $q->where('name', 'like', "%{$search}%")
+                                  ->orWhere('email', 'like', "%{$search}%")
+                                  ->orWhere('role', 'like', "%{$search}%");
+                            });
+                        })
                         ->orderBy('name')
-                        ->paginate(10);
-        return view('admin.kelola_user.index', compact('users'));
+                        ->paginate(10)
+                        ->appends(['search' => $search]);
+        return view('admin.kelola_user.index', compact('users', 'search'));
     }
 
     public function store(Request $request)

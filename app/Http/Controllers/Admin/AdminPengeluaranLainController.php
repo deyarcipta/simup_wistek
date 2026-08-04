@@ -9,12 +9,19 @@ use App\Models\Piutang;
 
 class AdminPengeluaranLainController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengeluaran = PengeluaranLain::latest('tanggal')->paginate(10);
+        $search = $request->get('search');
+        $pengeluaran = PengeluaranLain::when($search, function ($query, $search) {
+                            return $query->where('keterangan', 'like', "%{$search}%")
+                                         ->orWhere('total', 'like', "%{$search}%");
+                        })
+                        ->latest('tanggal')
+                        ->paginate(10)
+                        ->appends(['search' => $search]);
         $piutangList = Piutang::where('sisa_nominal', '>', 0)->get();
 
-        return view('admin.pengeluaran.lain.index', compact('pengeluaran', 'piutangList'));
+        return view('admin.pengeluaran.lain.index', compact('pengeluaran', 'piutangList', 'search'));
     }
 
     public function store(Request $request)

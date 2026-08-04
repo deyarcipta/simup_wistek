@@ -9,11 +9,20 @@ use Illuminate\Http\Request;
 
 class AdminProdukJasaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $produkJasa = ProdukJasa::with('stokBarang')->orderBy('created_at', 'desc')->paginate(10);
+        $search = $request->get('search');
+        $produkJasa = ProdukJasa::with('stokBarang')
+                        ->when($search, function ($query, $search) {
+                            return $query->where('nama', 'like', "%{$search}%")
+                                         ->orWhere('jenis', 'like', "%{$search}%")
+                                         ->orWhere('harga', 'like', "%{$search}%");
+                        })
+                        ->orderBy('created_at', 'desc')
+                        ->paginate(10)
+                        ->appends(['search' => $search]);
         $stokBarangList = StokBarang::all();
-        return view('admin.produk_jasa.index', compact('produkJasa', 'stokBarangList'));
+        return view('admin.produk_jasa.index', compact('produkJasa', 'stokBarangList', 'search'));
     }
 
     public function store(Request $request)

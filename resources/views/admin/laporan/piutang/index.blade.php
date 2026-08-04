@@ -17,6 +17,24 @@
         @endif --}}
 
 
+        <div class="row mb-3 justify-content-end">
+            <div class="col-md-4 col-12">
+                <form action="{{ route('laporan.piutang') }}" method="GET" class="d-flex">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari kepada atau nama barang..." value="{{ $search ?? '' }}">
+                        <button class="btn btn-primary btn-sm" type="submit">
+                            <i class="bx bx-search"></i>
+                        </button>
+                        @if(!empty($search))
+                            <a href="{{ route('laporan.piutang') }}" class="btn btn-secondary btn-sm">
+                                <i class="bx bx-x"></i>
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
                 <thead>

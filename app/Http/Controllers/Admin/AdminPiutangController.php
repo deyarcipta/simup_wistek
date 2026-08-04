@@ -9,10 +9,17 @@ use App\Models\PengeluaranLain;
 
 class AdminPiutangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = Piutang::latest('tanggal_peminjaman')->paginate(10);
-        return view('admin.laporan.piutang.index', compact('data'));
+        $search = $request->get('search');
+        $data = Piutang::when($search, function ($query, $search) {
+                            return $query->where('kepada', 'like', "%{$search}%")
+                                         ->orWhere('nama_barang', 'like', "%{$search}%");
+                        })
+                        ->latest('tanggal_peminjaman')
+                        ->paginate(10)
+                        ->appends(['search' => $search]);
+        return view('admin.laporan.piutang.index', compact('data', 'search'));
     }
 
     public function store(Request $request)

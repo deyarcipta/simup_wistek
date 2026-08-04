@@ -21,9 +21,29 @@
         </div>
     </div>
     <div class="card-body">
-        {{-- @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif --}}
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show shadow-lg position-fixed end-0 top-0 m-3 z-3" role="alert" style="max-width: 350px;">
+                <div class="d-flex align-items-center">
+                    <i class="bx bx-check-circle me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Sukses!</strong> {{ session('success') }}
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show shadow-lg position-fixed end-0 top-0 m-3 z-3" role="alert" style="max-width: 350px;">
+                <div class="d-flex align-items-center">
+                    <i class="bx bx-error-circle me-2" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Error!</strong> {{ session('error') }}
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
 
         <div class="table-responsive">
@@ -46,12 +66,9 @@
                             <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $user->id }}">
                                 <i class="bx bx-edit"></i>
                             </button>
-                            <form action="{{ route('kelola-user.destroy', $user->id) }}" method="POST" style="display:inline-block">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm" onclick="return confirm('Hapus user ini?')">
-                                    <i class="bx bx-trash"></i>
-                                </button>
-                            </form>
+                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalDelete{{ $user->id }}">
+                                <i class="bx bx-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 @empty
@@ -142,6 +159,31 @@
                     <button class="btn btn-warning">Update</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Delete untuk setiap user --}}
+<div class="modal fade" id="modalDelete{{ $user->id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-0 pb-3">
+                <div class="text-danger mb-3" style="font-size: 3rem;">
+                    <i class="bx bx-error-circle"></i>
+                </div>
+                <h5 class="modal-title mb-2 fw-bold">Konfirmasi Hapus</h5>
+                <p class="text-muted small">Apakah Anda yakin ingin menghapus user <strong>{{ $user->name }}</strong>? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center gap-2 pt-0 pb-4">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                <form action="{{ route('kelola-user.destroy', $user->id) }}" method="POST" class="d-inline">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

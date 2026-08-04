@@ -57,8 +57,17 @@ class AdminKelolaUserController extends Controller
 
     public function destroy(User $kelola_user)
     {
-        $kelola_user->delete();
-        return back()->with('success', 'User berhasil dihapus.');
+        try {
+            $kelola_user->delete();
+            return back()->with('success', 'User berhasil dihapus.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'constraint fails')) {
+                return back()->with('error', 'Tidak dapat menghapus user ini karena data user masih terikat dengan data logbook atau transaksi.');
+            }
+            return back()->with('error', 'Gagal menghapus user: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus user: ' . $e->getMessage());
+        }
     }
 
     public function downloadSample()

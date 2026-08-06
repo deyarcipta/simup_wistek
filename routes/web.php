@@ -97,6 +97,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('logbook', [AdminLogbookController::class, 'index'])->name('admin.logbook.index');
         Route::get('logbook/download-pdf', [AdminLogbookController::class, 'exportPdf'])->name('admin.logbook.download-pdf');
         Route::get('logbook/download-excel', [AdminLogbookController::class, 'exportExcel'])->name('admin.logbook.download-excel');
+        Route::get('kehadiran', [AdminLogbookController::class, 'kehadiran'])->name('admin.kehadiran.index');
         Route::get('logbook/{id}', [AdminLogbookController::class, 'show'])->name('admin.logbook.show');
 
         // Pengaturan

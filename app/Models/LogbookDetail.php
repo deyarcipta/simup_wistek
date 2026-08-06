@@ -12,6 +12,7 @@ class LogbookDetail extends Model
         'logbook_id',
         'shift_id',
         'user_id',
+        'waktu_mulai',
         'jumlah_print',
         'harga_print',
         'jumlah_fotokopi',
@@ -48,7 +49,8 @@ class LogbookDetail extends Model
      */
     public function getLatenessInfo()
     {
-        if (!$this->waktu_mulai) {
+        $time = $this->waktu_mulai ?? ($this->shift_id == 1 ? ($this->logbook?->created_at ?? $this->created_at) : $this->created_at);
+        if (!$time) {
             return [
                 'is_late' => false,
                 'status_text' => 'Tepat Waktu',
@@ -75,7 +77,7 @@ class LogbookDetail extends Model
         }
 
         try {
-            $dateStr = $this->waktu_mulai->format('Y-m-d');
+            $dateStr = $time->format('Y-m-d');
             $scheduledStart = \Carbon\Carbon::parse($dateStr . ' ' . $scheduledStartStr);
         } catch (\Exception $e) {
             return [
@@ -85,7 +87,7 @@ class LogbookDetail extends Model
             ];
         }
 
-        if ($this->waktu_mulai->lte($scheduledStart)) {
+        if ($time->lte($scheduledStart)) {
             return [
                 'is_late' => false,
                 'status_text' => 'Tepat Waktu',
@@ -93,7 +95,7 @@ class LogbookDetail extends Model
             ];
         }
 
-        $diffInMinutes = $scheduledStart->diffInMinutes($this->waktu_mulai);
+        $diffInMinutes = $scheduledStart->diffInMinutes($time);
 
         if ($diffInMinutes <= $toleransi) {
             return [

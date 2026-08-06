@@ -253,4 +253,33 @@ class AdminLogbookController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    public function kehadiran(Request $request)
+    {
+        $search = $request->get('search');
+        $shiftFilter = $request->get('shift_id');
+
+        $query = \App\Models\LogbookDetail::with(['logbook', 'user', 'shift'])
+            ->whereHas('logbook')
+            ->whereHas('user');
+
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($shiftFilter) {
+            $query->where('shift_id', $shiftFilter);
+        }
+
+        $details = $query->orderBy('waktu_mulai', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(15)
+            ->appends(['search' => $search, 'shift_id' => $shiftFilter]);
+
+        $shifts = \App\Models\Shift::all();
+
+        return view('admin.logbook.kehadiran', compact('details', 'shifts', 'search', 'shiftFilter'));
+    }
 }

@@ -51,6 +51,14 @@
       </a>
     </li>
 
+    {{-- Kehadiran Operator --}}
+    <li class="menu-item {{ request()->is('admin/kehadiran*') ? 'active' : '' }}">
+      <a href="{{ route('admin.kehadiran.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-user-voice"></i>
+        <div>Kehadiran Operator</div>
+      </a>
+    </li>
+
     {{-- MANAJEMEN DATA & TRANSAKSI --}}
     <li class="menu-header small text-uppercase">
       <span class="menu-header-text">Operasional</span>

@@ -15,7 +15,7 @@
                     </span>
                     <span class="text-white-50 small">{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM YYYY') }}</span>
                 </div>
-                <h2 class="text-white fw-bold mb-2">Selamat Datang Kembali, {{ Auth::user()->name ?? 'Operator' }}! 👋</h2>
+                <h2 class="text-white fw-bold mb-2">Selamat Datang Kembali, {{ Auth::user()->name ?? 'Operator' }}! <span class="wave-emoji">👋</span></h2>
                 <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 600px;">
                     Kelola operasional harian kasir, pencatatan logbook shift, serta pemantauan stok produk dan transaksi unit produksi Wistek.
                 </p>

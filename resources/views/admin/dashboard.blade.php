@@ -15,7 +15,7 @@
                     </span>
                     <span class="text-white-50 small">{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM YYYY') }}</span>
                 </div>
-                <h2 class="text-white fw-bold mb-2">Selamat Datang Kembali, {{ Auth::user()->name ?? 'Administrator' }}! 👋</h2>
+                <h2 class="text-white fw-bold mb-2">Selamat Datang Kembali, {{ Auth::user()->name ?? 'Administrator' }}! <span class="wave-emoji">👋</span></h2>
                 <p class="text-white-50 mb-0" style="font-size: 0.95rem; max-width: 600px;">
                     Berikut adalah ringkasan kinerja keuangan, omzet logbook harian, dan tren operasional Unit Produksi Wistek bulan ini.
                 </p>

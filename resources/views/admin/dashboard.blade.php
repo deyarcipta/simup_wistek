@@ -11,7 +11,7 @@
             <div class="col-lg-8 mb-3 mb-lg-0">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="badge hero-glass-pill px-3 py-1 rounded-pill">
-                        <i class="bx bx-sparkles me-1"></i> SIMUP Wistek Analytics
+                        <i class="bx bx-chart me-1"></i> SIMUP Wistek Analytics
                     </span>
                     <span class="text-white-50 small">{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM YYYY') }}</span>
                 </div>

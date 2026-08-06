@@ -14,6 +14,10 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
+        $hariIni = Carbon::today();
+        $pemasukanHariIni = Transaksi::whereDate('tanggal', $hariIni)->sum('total');
+        $transaksiHariIni = Transaksi::whereDate('tanggal', $hariIni)->count();
+
         $bulanSekarang = Carbon::now()->month;
         $tahunSekarang = Carbon::now()->year;
 
@@ -115,6 +119,8 @@ class AdminDashboardController extends Controller
         $stokKertasStatus = $latestLogbook ? $latestLogbook->stok_kertas : 'Aman';
 
         return view('admin.dashboard', compact(
+            'pemasukanHariIni',
+            'transaksiHariIni',
             'pendapatanBulanIni',
             'pendapatanBulanLalu',
             'persentasePendapatan',

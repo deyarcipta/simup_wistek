@@ -29,6 +29,43 @@
         </div>
     </div>
 
+    {{-- TODAY'S METRICS ROW --}}
+    <div class="row g-3 mb-4">
+        {{-- Pemasukan Hari Ini --}}
+        <div class="col-md-6">
+            <div class="modern-card p-4 h-100 border-start border-success border-4 shadow-sm" style="border-radius: 8px;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-success fw-bold d-block mb-1" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                            <i class="bx bx-calendar-check me-1"></i> PEMASUKAN HARI INI
+                        </span>
+                        <h3 class="fw-bold text-dark mb-0">Rp {{ number_format($pemasukanHariIni, 0, ',', '.') }}</h3>
+                    </div>
+                    <div class="stat-icon-wrapper d-flex align-items-center justify-content-center" style="background-color: rgba(40, 167, 69, 0.1); color: #28a745; width: 48px; height: 48px; border-radius: 50%;">
+                        <i class="bx bx-wallet" style="font-size: 1.75rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Transaksi Hari Ini --}}
+        <div class="col-md-6">
+            <div class="modern-card p-4 h-100 border-start border-warning border-4 shadow-sm" style="border-radius: 8px;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-warning fw-bold d-block mb-1" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                            <i class="bx bx-shopping-bag me-1"></i> TRANSAKSI HARI INI
+                        </span>
+                        <h3 class="fw-bold text-dark mb-0">{{ number_format($transaksiHariIni) }} <span class="fs-6 text-muted fw-normal">Transaksi</span></h3>
+                    </div>
+                    <div class="stat-icon-wrapper d-flex align-items-center justify-content-center" style="background-color: rgba(255, 193, 7, 0.1); color: #ffc107; width: 48px; height: 48px; border-radius: 50%;">
+                        <i class="bx bx-cart" style="font-size: 1.75rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- FINANCIAL METRICS ROW --}}
     <div class="row g-3 mb-4">
         {{-- Pendapatan Bulan Ini --}}

@@ -278,8 +278,149 @@ class AdminLogbookController extends Controller
             ->paginate(15)
             ->appends(['search' => $search, 'shift_id' => $shiftFilter]);
 
+        // Query terpisah tanpa paginasi untuk rekap per operator
+        $rekapQuery = \App\Models\LogbookDetail::with(['user', 'logbook'])
+            ->whereHas('logbook')
+            ->whereHas('user');
+
+        if ($search) {
+            $rekapQuery->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($shiftFilter) {
+            $rekapQuery->where('shift_id', $shiftFilter);
+        }
+
+        $allDetails = $rekapQuery->orderBy('waktu_mulai', 'desc')->get();
+
+        // Kelompokkan per operator untuk tabel Rekap
+        $rekapOperator = $allDetails->groupBy('user_id')->map(function ($items) {
+            $user = $items->first()->user;
+            
+            // Dapatkan list tanggal menjaga yang unik
+            $dates = $items->map(function ($item) {
+                return $item->logbook ? $item->logbook->tanggal->format('d/m/Y') : '';
+            })->filter()->unique()->implode(', ');
+
+            return [
+                'user' => $user,
+                'jumlah_shift' => $items->count(),
+                'tanggal_menjaga' => $dates,
+            ];
+        });
+
         $shifts = \App\Models\Shift::all();
 
-        return view('admin.logbook.kehadiran', compact('details', 'shifts', 'search', 'shiftFilter'));
+        return view('admin.logbook.kehadiran', compact('details', 'rekapOperator', 'shifts', 'search', 'shiftFilter'));
+    }
+
+    public function downloadKehadiranPdf(Request $request)
+    {
+        $search = $request->get('search');
+        $shiftFilter = $request->get('shift_id');
+
+        $query = \App\Models\LogbookDetail::with(['logbook', 'user', 'shift'])
+            ->whereHas('logbook')
+            ->whereHas('user');
+
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($shiftFilter) {
+            $query->where('shift_id', $shiftFilter);
+        }
+
+        $details = $query->orderBy('waktu_mulai', 'desc')->get();
+        $namaShift = $shiftFilter ? (\App\Models\Shift::find($shiftFilter)?->nama_shift ?? 'Shift') : 'Semua Shift';
+
+        $pdf = Pdf::loadView('admin.logbook.kehadiran_pdf', compact('details', 'namaShift'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download("Laporan-Kehadiran-Operator-" . now()->format('YmdHis') . ".pdf");
+    }
+
+    public function downloadKehadiranExcel(Request $request)
+    {
+        $search = $request->get('search');
+        $shiftFilter = $request->get('shift_id');
+
+        $query = \App\Models\LogbookDetail::with(['logbook', 'user', 'shift'])
+            ->whereHas('logbook')
+            ->whereHas('user');
+
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($shiftFilter) {
+            $query->where('shift_id', $shiftFilter);
+        }
+
+        $details = $query->orderBy('waktu_mulai', 'desc')->get();
+
+        $fileName = "Laporan-Kehadiran-Operator-" . now()->format('YmdHis') . ".csv";
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['No', 'Tanggal', 'Nama Operator', 'Email', 'Shift', 'Jam Check-In', 'Jam Check-Out', 'Status Kehadiran'];
+
+        $callback = function() use($details, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($details as $index => $detail) {
+                $logbook = $detail->logbook;
+                $lateness = $detail->getLatenessInfo();
+                
+                // Tentukan check-in
+                $checkinTime = $detail->waktu_mulai ?? ($detail->shift_id == 1 ? $logbook->created_at : $detail->created_at);
+
+                // Tentukan jam checkout
+                $checkoutTime = null;
+                $isCheckedOut = false;
+                if ($detail->shift_id == 1) {
+                    $checkoutTime = $detail->created_at;
+                    $isCheckedOut = true;
+                } elseif ($detail->shift_id == 2) {
+                    if (in_array($logbook->status, ['shift_2_selesai', 'tutup_up'])) {
+                        $checkoutTime = $detail->updated_at;
+                        $isCheckedOut = true;
+                    }
+                } elseif ($detail->shift_id == 3) {
+                    if ($logbook->status === 'tutup_up') {
+                        $checkoutTime = $detail->updated_at;
+                        $isCheckedOut = true;
+                    }
+                }
+
+                fputcsv($file, [
+                    $index + 1,
+                    $logbook->tanggal->format('Y-m-d'),
+                    $detail->user->name,
+                    $detail->user->email,
+                    $detail->shift->nama_shift,
+                    $checkinTime ? $checkinTime->format('H:i') : '-',
+                    ($isCheckedOut && $checkoutTime) ? $checkoutTime->format('H:i') : 'Sedang Bertugas',
+                    $lateness['status_text'],
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

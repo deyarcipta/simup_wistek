@@ -78,6 +78,8 @@
                                 $s1Items = DB::table('transaksi_detail')
                                     ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
                                     ->join('produk_jasa', 'transaksi_detail.produk_jasa_id', '=', 'produk_jasa.id')
+                                    ->join('users', 'transaksi.user_id', '=', 'users.id')
+                                    ->where('users.role', '!=', 'admin')
                                     ->whereBetween('transaksi.created_at', [$s1Start, $s1End])
                                     ->select(
                                         'produk_jasa.nama as produk_nama',
@@ -246,6 +248,8 @@
                                 $s2Items = DB::table('transaksi_detail')
                                     ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
                                     ->join('produk_jasa', 'transaksi_detail.produk_jasa_id', '=', 'produk_jasa.id')
+                                    ->join('users', 'transaksi.user_id', '=', 'users.id')
+                                    ->where('users.role', '!=', 'admin')
                                     ->whereBetween('transaksi.created_at', [$s2Start, $s2End])
                                     ->select(
                                         'produk_jasa.nama as produk_nama',
@@ -415,6 +419,8 @@
                                 $s3Items = DB::table('transaksi_detail')
                                     ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
                                     ->join('produk_jasa', 'transaksi_detail.produk_jasa_id', '=', 'produk_jasa.id')
+                                    ->join('users', 'transaksi.user_id', '=', 'users.id')
+                                    ->where('users.role', '!=', 'admin')
                                     ->whereBetween('transaksi.created_at', [$s3Start, $s3End])
                                     ->select(
                                         'produk_jasa.nama as produk_nama',

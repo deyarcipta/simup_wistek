@@ -451,6 +451,8 @@ class LogbookController extends Controller
     {
         return DB::table('transaksi_detail')
             ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
+            ->join('users', 'transaksi.user_id', '=', 'users.id')
+            ->where('users.role', '!=', 'admin')
             ->whereBetween('transaksi.created_at', [$start, $end])
             ->where('transaksi_detail.produk_jasa_id', $productId)
             ->sum('transaksi_detail.jumlah');
@@ -460,6 +462,8 @@ class LogbookController extends Controller
     {
         return DB::table('transaksi_detail')
             ->join('transaksi', 'transaksi_detail.transaksi_id', '=', 'transaksi.id')
+            ->join('users', 'transaksi.user_id', '=', 'users.id')
+            ->where('users.role', '!=', 'admin')
             ->whereBetween('transaksi.created_at', [$start, $end])
             ->whereNotIn('transaksi_detail.produk_jasa_id', [$printId, $copyId, $jilidId])
             ->sum('transaksi_detail.subtotal');

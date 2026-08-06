@@ -22,10 +22,15 @@ class ProfileController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'password' => 'nullable|string|min:6|confirmed',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
 
         // Jika ada foto yang diupload
         if ($request->hasFile('foto')) {

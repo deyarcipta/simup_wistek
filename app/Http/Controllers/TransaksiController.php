@@ -30,17 +30,81 @@ class TransaksiController extends Controller
             ->appends(['search' => $search, 'tab' => 'riwayat']);
     
         $today = Carbon::today();
-        $logbook = \App\Models\Logbook::where('tanggal', $today)->first();
-        $hasStartedLogbook = $logbook && in_array($logbook->status, ['aktif', 'shift_1_selesai']);
+        $logbook = \App\Models\Logbook::with(['user', 'details.user'])->where('tanggal', $today)->first();
+        
+        $hasStartedLogbook = false;
+        $activeOperatorId = null;
+        $activeOperatorName = '';
 
-        return view('operator.transaksi.index', compact('produkJasa', 'transaksi', 'search', 'hasStartedLogbook'));
+        if ($logbook) {
+            if ($logbook->status === 'aktif') {
+                $hasStartedLogbook = true;
+                $activeOperatorId = $logbook->user_id;
+                $activeOperatorName = $logbook->user?->name;
+            } elseif ($logbook->status === 'shift_1_selesai') {
+                $shift2Detail = $logbook->details->where('shift_id', 2)->first();
+                if ($shift2Detail) {
+                    $hasStartedLogbook = true;
+                    $activeOperatorId = $shift2Detail->user_id;
+                    $activeOperatorName = $shift2Detail->user?->name;
+                }
+            } elseif ($logbook->status === 'shift_2_selesai') {
+                $shift3Detail = $logbook->details->where('shift_id', 3)->first();
+                if ($shift3Detail) {
+                    $hasStartedLogbook = true;
+                    $activeOperatorId = $shift3Detail->user_id;
+                    $activeOperatorName = $shift3Detail->user?->name;
+                }
+            }
+        }
+
+        $isDifferentOperator = false;
+        if ($hasStartedLogbook && Auth::user()->role === 'operator') {
+            if ($activeOperatorId !== Auth::id()) {
+                $isDifferentOperator = true;
+            }
+        }
+
+        return view('operator.transaksi.index', compact(
+            'produkJasa', 
+            'transaksi', 
+            'search', 
+            'hasStartedLogbook', 
+            'isDifferentOperator', 
+            'activeOperatorName'
+        ));
     }
 
     public function store(Request $request)
     {   
         $today = Carbon::today();
-        $logbook = \App\Models\Logbook::where('tanggal', $today)->first();
-        $hasStartedLogbook = $logbook && in_array($logbook->status, ['aktif', 'shift_1_selesai']);
+        $logbook = \App\Models\Logbook::with(['user', 'details.user'])->where('tanggal', $today)->first();
+        
+        $hasStartedLogbook = false;
+        $activeOperatorId = null;
+        $activeOperatorName = '';
+
+        if ($logbook) {
+            if ($logbook->status === 'aktif') {
+                $hasStartedLogbook = true;
+                $activeOperatorId = $logbook->user_id;
+                $activeOperatorName = $logbook->user?->name;
+            } elseif ($logbook->status === 'shift_1_selesai') {
+                $shift2Detail = $logbook->details->where('shift_id', 2)->first();
+                if ($shift2Detail) {
+                    $hasStartedLogbook = true;
+                    $activeOperatorId = $shift2Detail->user_id;
+                    $activeOperatorName = $shift2Detail->user?->name;
+                }
+            } elseif ($logbook->status === 'shift_2_selesai') {
+                $shift3Detail = $logbook->details->where('shift_id', 3)->first();
+                if ($shift3Detail) {
+                    $hasStartedLogbook = true;
+                    $activeOperatorId = $shift3Detail->user_id;
+                    $activeOperatorName = $shift3Detail->user?->name;
+                }
+            }
+        }
 
         if (!$hasStartedLogbook) {
             return $request->expectsJson() || $request->ajax()
@@ -49,6 +113,16 @@ class TransaksiController extends Controller
                     'message' => 'Hari operasional belum dimulai atau sudah ditutup. Anda tidak dapat melakukan transaksi POS sekarang.'
                 ], 403)
                 : redirect()->back()->with('error', 'Hari operasional belum dimulai atau sudah ditutup. Anda tidak dapat melakukan transaksi POS sekarang.');
+        }
+
+        if (Auth::user()->role === 'operator' && $activeOperatorId !== Auth::id()) {
+            $msg = 'Hanya operator yang memulai shift (' . ($activeOperatorName ?: 'Operator penanggung jawab') . ') yang dapat melakukan input transaksi.';
+            return $request->expectsJson() || $request->ajax()
+                ? response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ], 403)
+                : redirect()->back()->with('error', $msg);
         }
 
         if ($request->has('cart') || $request->isJson()) {
@@ -176,6 +250,30 @@ class TransaksiController extends Controller
         // Validasi operator: Hanya pembuat transaksi di hari yang sama yang bisa menghapus
         if ($transaksi->user_id !== Auth::id()) {
             return redirect()->back()->with('error', 'Anda tidak diperbolehkan menghapus transaksi milik operator lain.');
+        }
+
+        $today = Carbon::today();
+        $logbook = \App\Models\Logbook::with(['user', 'details.user'])->where('tanggal', $today)->first();
+        
+        $activeOperatorId = null;
+        if ($logbook) {
+            if ($logbook->status === 'aktif') {
+                $activeOperatorId = $logbook->user_id;
+            } elseif ($logbook->status === 'shift_1_selesai') {
+                $shift2Detail = $logbook->details->where('shift_id', 2)->first();
+                if ($shift2Detail) {
+                    $activeOperatorId = $shift2Detail->user_id;
+                }
+            } elseif ($logbook->status === 'shift_2_selesai') {
+                $shift3Detail = $logbook->details->where('shift_id', 3)->first();
+                if ($shift3Detail) {
+                    $activeOperatorId = $shift3Detail->user_id;
+                }
+            }
+        }
+
+        if (Auth::user()->role === 'operator' && $activeOperatorId !== Auth::id()) {
+            return redirect()->back()->with('error', 'Hanya operator yang memulai shift yang aktif yang dapat menghapus transaksi.');
         }
 
         if (!$transaksi->created_at->isToday()) {

@@ -23,6 +23,27 @@
         </div>
     </div>
 </div>
+@elseif($isDifferentOperator)
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow border-0 text-center py-5">
+            <div class="card-body">
+                <div class="mb-4">
+                    <i class="bx bx-user-x text-danger animate-bounce" style="font-size: 5rem;"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-2">Akses Dibatasi!</h3>
+                <p class="text-muted mx-auto" style="max-width: 500px;">
+                    Shift saat ini sedang berjalan oleh operator <strong>{{ $activeOperatorName }}</strong>. Hanya operator yang memulai shift saja yang dapat mengakses transaksi dan melakukan input transaksi.
+                </p>
+                <div class="mt-4">
+                    <a href="{{ route('operator.logbook.index') }}" class="btn btn-primary text-white fw-bold btn-lg shadow-sm">
+                        <i class="bx bx-book-open me-1"></i> Buka Menu Logbook Hari Ini
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @else
 <div class="row">
     <div class="col-12">

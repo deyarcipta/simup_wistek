@@ -11,6 +11,17 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <form action="{{ route('operator.profile.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -22,6 +33,16 @@
         <div class="mb-3">
             <label>Email</label>
             <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}">
+        </div>
+
+        <div class="mb-3">
+            <label>Password Baru</label>
+            <input type="password" name="password" class="form-control" placeholder="Kosongkan jika tidak ingin merubah password">
+        </div>
+
+        <div class="mb-3">
+            <label>Konfirmasi Password Baru</label>
+            <input type="password" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
         </div>
 
         <div class="mb-3">

@@ -53,10 +53,16 @@ class AdminLogbookController extends Controller
         $s1End = $s1 ? $s1->created_at : Carbon::now();
 
         $s2Start = $s1 ? $s1->created_at : null;
-        $s2End = $s2 ? $s2->created_at : Carbon::now();
+        $s2End = ($s2 && in_array($logbook->status, ['shift_2_selesai', 'tutup_up'])) 
+            ? $s2->updated_at 
+            : Carbon::now();
 
-        $s3Start = $s2 ? $s2->created_at : null;
-        $s3End = $s3 ? $s3->created_at : Carbon::now();
+        $s3Start = ($s2 && in_array($logbook->status, ['shift_2_selesai', 'tutup_up'])) 
+            ? $s2->updated_at 
+            : null;
+        $s3End = ($s3 && $logbook->status === 'tutup_up') 
+            ? $s3->updated_at 
+            : Carbon::now();
 
         $getShiftData = function ($start, $end) use ($produkJasaList) {
             if (!$start || !$end) {
@@ -68,6 +74,9 @@ class AdminLogbookController extends Controller
             }
 
             $transaksi = \App\Models\Transaksi::with(['details.produkJasa', 'user'])
+                ->whereHas('user', function ($query) {
+                    $query->where('role', '!=', 'admin');
+                })
                 ->whereBetween('created_at', [$start, $end])
                 ->get();
 

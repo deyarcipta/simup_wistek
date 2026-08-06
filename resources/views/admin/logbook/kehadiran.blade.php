@@ -5,12 +5,12 @@
 <div class="row">
     {{-- STATS HEADER --}}
     <div class="col-12 mb-4">
-        <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #696cff 0%, #4346e6 100%);">
+        <div class="card bg-primary text-white shadow">
             <div class="card-body d-flex align-items-center justify-content-between p-4">
                 <div>
-                    <h5 class="text-white mb-1" style="opacity: 0.85;"><i class="bx bx-user-voice me-1"></i> Kehadiran & Jam Kerja Operator</h5>
-                    <h2 class="text-white mb-2 fw-bold">Monitoring Presensi Shift</h2>
-                    <p class="mb-0 text-white" style="font-size: 0.85rem; max-width: 600px; opacity: 0.9;">
+                    <h5 class="text-white-50 mb-1"><i class="bx bx-user-voice me-1"></i> Kehadiran & Jam Kerja Operator</h5>
+                    <h2 class="text-white mb-0 fw-bold">Monitoring Presensi Shift</h2>
+                    <p class="mb-0 mt-1 text-white-50" style="font-size: 0.85rem; max-width: 600px;">
                         Pantau ketepatan waktu check-in, jam check-out, status keterlambatan secara otomatis, serta lakukan rekapitulasi data dan ekspor laporan.
                     </p>
                 </div>

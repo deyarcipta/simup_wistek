@@ -58,7 +58,7 @@
                                     <i class="bx bxs-file-pdf me-1"></i> PDF
                                 </a>
                                 <a href="{{ route('admin.kehadiran.download-excel', ['search' => $search, 'shift_id' => $shiftFilter]) }}" class="btn btn-sm btn-success shadow-sm">
-                                    <i class="bx bxs-spreadsheet me-1"></i> Excel/CSV
+                                    <i class="bx bxs-spreadsheet me-1"></i> Excel
                                 </a>
                             </div>
                         </div>

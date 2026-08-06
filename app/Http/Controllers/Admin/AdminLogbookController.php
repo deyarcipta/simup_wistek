@@ -365,62 +365,117 @@ class AdminLogbookController extends Controller
 
         $details = $query->orderBy('waktu_mulai', 'desc')->get();
 
-        $fileName = "Laporan-Kehadiran-Operator-" . now()->format('YmdHis') . ".csv";
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+        // Judul Laporan
+        $sheet->setCellValue('A1', 'LAPORAN KEHADIRAN & JAM KERJA OPERATOR');
+        $sheet->mergeCells('A1:H1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A2', 'Unit Produksi (UP) - Dicetak pada: ' . now()->format('d/m/Y H:i') . ' WIB');
+        $sheet->mergeCells('A2:H2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header Table
+        $headers = ['No', 'Tanggal', 'Nama Operator', 'Email', 'Shift', 'Jam Check-In', 'Jam Check-Out', 'Status Kehadiran'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        foreach ($headers as $index => $header) {
+            $colLetter = $cols[$index];
+            $sheet->setCellValue($colLetter . '4', $header);
+        }
+
+        // Style Header
+        $styleHeader = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4F81BD'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
         ];
+        $sheet->getStyle('A4:H4')->applyFromArray($styleHeader);
 
-        $columns = ['No', 'Tanggal', 'Nama Operator', 'Email', 'Shift', 'Jam Check-In', 'Jam Check-Out', 'Status Kehadiran'];
+        $rowNum = 5;
+        foreach ($details as $index => $detail) {
+            $logbook = $detail->logbook;
+            $lateness = $detail->getLatenessInfo();
+            
+            // Tentukan check-in
+            $checkinTime = $detail->waktu_mulai ?? ($detail->shift_id == 1 ? $logbook->created_at : $detail->created_at);
 
-        $callback = function() use($details, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-
-            foreach ($details as $index => $detail) {
-                $logbook = $detail->logbook;
-                $lateness = $detail->getLatenessInfo();
-                
-                // Tentukan check-in
-                $checkinTime = $detail->waktu_mulai ?? ($detail->shift_id == 1 ? $logbook->created_at : $detail->created_at);
-
-                // Tentukan jam checkout
-                $checkoutTime = null;
-                $isCheckedOut = false;
-                if ($detail->shift_id == 1) {
-                    $checkoutTime = $detail->created_at;
+            // Tentukan jam checkout
+            $checkoutTime = null;
+            $isCheckedOut = false;
+            if ($detail->shift_id == 1) {
+                $checkoutTime = $detail->created_at;
+                $isCheckedOut = true;
+            } elseif ($detail->shift_id == 2) {
+                if (in_array($logbook->status, ['shift_2_selesai', 'tutup_up'])) {
+                    $checkoutTime = $detail->updated_at;
                     $isCheckedOut = true;
-                } elseif ($detail->shift_id == 2) {
-                    if (in_array($logbook->status, ['shift_2_selesai', 'tutup_up'])) {
-                        $checkoutTime = $detail->updated_at;
-                        $isCheckedOut = true;
-                    }
-                } elseif ($detail->shift_id == 3) {
-                    if ($logbook->status === 'tutup_up') {
-                        $checkoutTime = $detail->updated_at;
-                        $isCheckedOut = true;
-                    }
                 }
-
-                fputcsv($file, [
-                    $index + 1,
-                    $logbook->tanggal->format('Y-m-d'),
-                    $detail->user->name,
-                    $detail->user->email,
-                    $detail->shift->nama_shift,
-                    $checkinTime ? $checkinTime->format('H:i') : '-',
-                    ($isCheckedOut && $checkoutTime) ? $checkoutTime->format('H:i') : 'Sedang Bertugas',
-                    $lateness['status_text'],
-                ]);
+            } elseif ($detail->shift_id == 3) {
+                if ($logbook->status === 'tutup_up') {
+                    $checkoutTime = $detail->updated_at;
+                    $isCheckedOut = true;
+                }
             }
 
-            fclose($file);
-        };
+            $sheet->setCellValue('A' . $rowNum, $index + 1);
+            $sheet->setCellValue('B' . $rowNum, $logbook->tanggal->format('Y-m-d'));
+            $sheet->setCellValue('C' . $rowNum, $detail->user->name);
+            $sheet->setCellValue('D' . $rowNum, $detail->user->email);
+            $sheet->setCellValue('E' . $rowNum, $detail->shift->nama_shift);
+            $sheet->setCellValue('F' . $rowNum, $checkinTime ? $checkinTime->format('H:i') : '-');
+            $sheet->setCellValue('G' . $rowNum, ($isCheckedOut && $checkoutTime) ? $checkoutTime->format('H:i') : 'Sedang Bertugas');
+            $sheet->setCellValue('H' . $rowNum, $lateness['status_text']);
 
-        return response()->stream($callback, 200, $headers);
+            // Align Center for some columns
+            $sheet->getStyle('A' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('B' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('F' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('H' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $rowNum++;
+        }
+
+        // Borders for Data
+        if ($rowNum > 5) {
+            $styleData = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'D3D3D3'],
+                    ],
+                ],
+            ];
+            $sheet->getStyle('A5:H' . ($rowNum - 1))->applyFromArray($styleData);
+        }
+
+        // Auto-width columns
+        foreach ($cols as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $tempFile = storage_path('app/temp_kehadiran_export_' . uniqid() . '.xlsx');
+        $writer->save($tempFile);
+
+        $fileName = "Laporan-Kehadiran-Operator-" . now()->format('YmdHis') . ".xlsx";
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 }

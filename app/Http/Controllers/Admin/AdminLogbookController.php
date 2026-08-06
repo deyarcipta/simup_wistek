@@ -478,4 +478,164 @@ class AdminLogbookController extends Controller
         $fileName = "Laporan-Kehadiran-Operator-" . now()->format('YmdHis') . ".xlsx";
         return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
+
+    public function downloadRekapPdf(Request $request)
+    {
+        $search = $request->get('search');
+        $shiftFilter = $request->get('shift_id');
+
+        $rekapQuery = \App\Models\LogbookDetail::with(['user', 'logbook'])
+            ->whereHas('logbook')
+            ->whereHas('user');
+
+        if ($search) {
+            $rekapQuery->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($shiftFilter) {
+            $rekapQuery->where('shift_id', $shiftFilter);
+        }
+
+        $allDetails = $rekapQuery->orderBy('waktu_mulai', 'desc')->get();
+
+        $rekapOperator = $allDetails->groupBy('user_id')->map(function ($items) {
+            $user = $items->first()->user;
+            $dates = $items->map(function ($item) {
+                return $item->logbook ? $item->logbook->tanggal->format('d/m/Y') : '';
+            })->filter()->unique()->implode(', ');
+
+            return [
+                'user' => $user,
+                'jumlah_shift' => $items->count(),
+                'tanggal_menjaga' => $dates,
+            ];
+        });
+
+        $namaShift = $shiftFilter ? (\App\Models\Shift::find($shiftFilter)?->nama_shift ?? 'Shift') : 'Semua Shift';
+
+        $pdf = Pdf::loadView('admin.logbook.rekap_pdf', compact('rekapOperator', 'namaShift'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download("Laporan-Rekap-Kehadiran-Operator-" . now()->format('YmdHis') . ".pdf");
+    }
+
+    public function downloadRekapExcel(Request $request)
+    {
+        $search = $request->get('search');
+        $shiftFilter = $request->get('shift_id');
+
+        $rekapQuery = \App\Models\LogbookDetail::with(['user', 'logbook'])
+            ->whereHas('logbook')
+            ->whereHas('user');
+
+        if ($search) {
+            $rekapQuery->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($shiftFilter) {
+            $rekapQuery->where('shift_id', $shiftFilter);
+        }
+
+        $allDetails = $rekapQuery->orderBy('waktu_mulai', 'desc')->get();
+
+        $rekapOperator = $allDetails->groupBy('user_id')->map(function ($items) {
+            $user = $items->first()->user;
+            $dates = $items->map(function ($item) {
+                return $item->logbook ? $item->logbook->tanggal->format('d/m/Y') : '';
+            })->filter()->unique()->implode(', ');
+
+            return [
+                'user' => $user,
+                'jumlah_shift' => $items->count(),
+                'tanggal_menjaga' => $dates,
+            ];
+        });
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Judul Laporan
+        $sheet->setCellValue('A1', 'LAPORAN REKAPITULASI KEHADIRAN OPERATOR');
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A2', 'Unit Produksi (UP) - Dicetak pada: ' . now()->format('d/m/Y H:i') . ' WIB');
+        $sheet->mergeCells('A2:E2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Header Table
+        $headers = ['No', 'Nama Operator', 'Email', 'Jumlah Shift Dijaga', 'Tanggal Menjaga'];
+        $cols = ['A', 'B', 'C', 'D', 'E'];
+        foreach ($headers as $index => $header) {
+            $colLetter = $cols[$index];
+            $sheet->setCellValue($colLetter . '4', $header);
+        }
+
+        // Style Header
+        $styleHeader = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4F81BD'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A4:E4')->applyFromArray($styleHeader);
+
+        $rowNum = 5;
+        $idx = 1;
+        foreach ($rekapOperator as $item) {
+            $sheet->setCellValue('A' . $rowNum, $idx++);
+            $sheet->setCellValue('B' . $rowNum, $item['user']->name);
+            $sheet->setCellValue('C' . $rowNum, $item['user']->email);
+            $sheet->setCellValue('D' . $rowNum, $item['jumlah_shift'] . ' Shift');
+            $sheet->setCellValue('E' . $rowNum, $item['tanggal_menjaga'] ?: '-');
+
+            $sheet->getStyle('A' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('D' . $rowNum)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $rowNum++;
+        }
+
+        // Borders for Data
+        if ($rowNum > 5) {
+            $styleData = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'D3D3D3'],
+                    ],
+                ],
+            ];
+            $sheet->getStyle('A5:E' . ($rowNum - 1))->applyFromArray($styleData);
+        }
+
+        // Auto-width columns
+        foreach ($cols as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $tempFile = storage_path('app/temp_rekap_export_' . uniqid() . '.xlsx');
+        $writer->save($tempFile);
+
+        $fileName = "Laporan-Rekap-Kehadiran-Operator-" . now()->format('YmdHis') . ".xlsx";
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+    }
 }

@@ -52,15 +52,6 @@
                                 </div>
                                 <button type="submit" class="btn btn-sm btn-primary shadow-sm">Cari</button>
                             </form>
-                            
-                            <div class="d-flex gap-1">
-                                <a href="{{ route('admin.kehadiran.download-pdf', ['search' => $search, 'shift_id' => $shiftFilter]) }}" class="btn btn-sm btn-danger shadow-sm">
-                                    <i class="bx bxs-file-pdf me-1"></i> PDF
-                                </a>
-                                <a href="{{ route('admin.kehadiran.download-excel', ['search' => $search, 'shift_id' => $shiftFilter]) }}" class="btn btn-sm btn-success shadow-sm">
-                                    <i class="bx bxs-spreadsheet me-1"></i> Excel
-                                </a>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -84,6 +75,14 @@
                 <div class="tab-content p-0" id="kehadiranTabsContent">
                     {{-- TAB 1: DETAIL --}}
                     <div class="tab-pane fade show active" id="detail-pane" role="tabpanel" aria-labelledby="detail-tab">
+                        <div class="d-flex justify-content-end gap-1 mb-3">
+                            <a href="{{ route('admin.kehadiran.download-pdf', ['search' => $search, 'shift_id' => $shiftFilter]) }}" class="btn btn-sm btn-danger shadow-sm">
+                                <i class="bx bxs-file-pdf me-1"></i> Unduh PDF Detail
+                            </a>
+                            <a href="{{ route('admin.kehadiran.download-excel', ['search' => $search, 'shift_id' => $shiftFilter]) }}" class="btn btn-sm btn-success shadow-sm">
+                                <i class="bx bxs-spreadsheet me-1"></i> Unduh Excel Detail
+                            </a>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered align-middle mb-0">
                                 <thead class="table-light">
@@ -195,6 +194,14 @@
 
                     {{-- TAB 2: REKAP PER OPERATOR --}}
                     <div class="tab-pane fade" id="rekap-pane" role="tabpanel" aria-labelledby="rekap-tab">
+                        <div class="d-flex justify-content-end gap-1 mb-3">
+                            <a href="{{ route('admin.kehadiran.rekap-pdf', ['search' => $search, 'shift_id' => $shiftFilter]) }}" class="btn btn-sm btn-danger shadow-sm">
+                                <i class="bx bxs-file-pdf me-1"></i> Unduh PDF Rekap
+                            </a>
+                            <a href="{{ route('admin.kehadiran.rekap-excel', ['search' => $search, 'shift_id' => $shiftFilter]) }}" class="btn btn-sm btn-success shadow-sm">
+                                <i class="bx bxs-spreadsheet me-1"></i> Unduh Excel Rekap
+                            </a>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered align-middle mb-0">
                                 <thead class="table-light">

@@ -4,6 +4,23 @@
 
 @section('content')
 <div class="row">
+    <div class="col-12 mb-4">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h5 class="text-white-50 mb-1"><i class="bx bx-calculator me-1"></i> Laporan Laba Rugi</h5>
+                    <h2 class="text-white mb-0 fw-bold">Sisa Hasil Usaha (SHU)</h2>
+                    <p class="mb-0 mt-1 text-white-50" style="font-size: 0.85rem; max-width: 600px;">
+                        Hitung laba kotor, laba bersih operasional, pembagian porsi SHU untuk sekolah/koperasi, serta alokasi bagi hasil karyawan.
+                    </p>
+                </div>
+                <div class="d-none d-md-block text-white" style="font-size: 5rem; opacity: 0.25; line-height: 1;">
+                    <i class="bx bx-calculator"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-12">
 
         {{-- Filter Tanggal & Download --}}

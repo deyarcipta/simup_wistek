@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'wistek_topup' => [
+        'secret' => env('WISTEK_WEBHOOK_SECRET', 'wistek_simup_secret_key_2026'),
+    ],
+
 ];

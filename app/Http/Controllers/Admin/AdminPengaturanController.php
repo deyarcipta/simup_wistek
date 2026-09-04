@@ -23,6 +23,7 @@ class AdminPengaturanController extends Controller
             'alamat'        => 'nullable|string|max:255',
             'telepon'       => 'nullable|string|max:20',
             'email'         => 'nullable|email|max:255',
+            'wistek_webhook_secret' => 'nullable|string|max:255',
             'logo'          => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
             'shu_penerima'   => 'nullable|array',
             'shu_penerima.*' => 'required_with:shu_persentase.*|string|max:255',

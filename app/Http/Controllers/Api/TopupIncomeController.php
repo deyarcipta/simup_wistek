@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pengaturan;
 use App\Models\ProdukJasa;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
@@ -17,7 +18,8 @@ class TopupIncomeController extends Controller
     public function store(Request $request)
     {
         $secretHeader = $request->header('X-Wistek-Secret');
-        $expectedSecret = config('services.wistek_topup.secret', 'wistek_simup_secret_key_2026');
+        $pengaturan = Pengaturan::first();
+        $expectedSecret = $pengaturan?->wistek_webhook_secret ?: config('services.wistek_topup.secret', 'wistek_simup_secret_key_2026');
 
         if (empty($secretHeader) || $secretHeader !== $expectedSecret) {
             return response()->json(['success' => false, 'message' => 'Unauthorized secret header'], 401);

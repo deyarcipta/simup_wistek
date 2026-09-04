@@ -54,6 +54,13 @@
                         <input type="text" name="telepon" class="form-control" value="{{ old('telepon', $pengaturan->telepon ?? '') }}">
                     </div>
 
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bx bx-key me-1"></i> Wistek Topup Webhook Secret Key</label>
+                        <input type="text" name="wistek_webhook_secret" class="form-control" value="{{ old('wistek_webhook_secret', $pengaturan->wistek_webhook_secret ?? 'wistek_simup_secret_key_2026') }}" placeholder="wistek_simup_secret_key_2026">
+                        <small class="text-muted">Token rahasia autentikasi webhook transaksi otomatis dari Wistek Topup.</small>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Email</label>
                         <input type="email" name="email" class="form-control" value="{{ old('email', $pengaturan->email ?? '') }}">

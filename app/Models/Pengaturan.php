@@ -14,6 +14,7 @@ class Pengaturan extends Model
         'alamat',
         'telepon',
         'email',
+        'wistek_webhook_secret',
         'logo',
         'shu_pembagian',
         'jumlah_shift',
